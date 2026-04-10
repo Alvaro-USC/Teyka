@@ -1,0 +1,432 @@
+--- ESQUEMA DEL DATASET: C:\Users\Álvaro Schwiedop\.cache\kagglehub\datasets\arashnic\fitbit\versions\2 ---
+
+NOTA: Las unidades no vienen incluidas en los archivos CSV.
+Deben revisarse en la documentación oficial (ej. README.md).
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: dailyActivity_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityDate                   [Unidad: ]
+  • TotalSteps                     [Unidad: ]
+  • TotalDistance                  [Unidad: ]
+  • TrackerDistance                [Unidad: ]
+  • LoggedActivitiesDistance       [Unidad: ]
+  • VeryActiveDistance             [Unidad: ]
+  • ModeratelyActiveDistance       [Unidad: ]
+  • LightActiveDistance            [Unidad: ]
+  • SedentaryActiveDistance        [Unidad: ]
+  • VeryActiveMinutes              [Unidad: ]
+  • FairlyActiveMinutes            [Unidad: ]
+  • LightlyActiveMinutes           [Unidad: ]
+  • SedentaryMinutes               [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: heartrate_seconds_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • Time                           [Unidad: ]
+  • Value                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: hourlyCalories_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: hourlyIntensities_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • TotalIntensity                 [Unidad: ]
+  • AverageIntensity               [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: hourlySteps_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • StepTotal                      [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: minuteCaloriesNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: minuteIntensitiesNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Intensity                      [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: minuteMETsNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • METs                           [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: minuteSleep_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • date                           [Unidad: ]
+  • value                          [Unidad: ]
+  • logId                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: minuteStepsNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Steps                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 3.12.16-4.11.16 | 📄 Archivo: weightLogInfo_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • Date                           [Unidad: ]
+  • WeightKg                       [Unidad: ]
+  • WeightPounds                   [Unidad: ]
+  • Fat                            [Unidad: ]
+  • BMI                            [Unidad: ]
+  • IsManualReport                 [Unidad: ]
+  • LogId                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: dailyActivity_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityDate                   [Unidad: ]
+  • TotalSteps                     [Unidad: ]
+  • TotalDistance                  [Unidad: ]
+  • TrackerDistance                [Unidad: ]
+  • LoggedActivitiesDistance       [Unidad: ]
+  • VeryActiveDistance             [Unidad: ]
+  • ModeratelyActiveDistance       [Unidad: ]
+  • LightActiveDistance            [Unidad: ]
+  • SedentaryActiveDistance        [Unidad: ]
+  • VeryActiveMinutes              [Unidad: ]
+  • FairlyActiveMinutes            [Unidad: ]
+  • LightlyActiveMinutes           [Unidad: ]
+  • SedentaryMinutes               [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: dailyCalories_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityDay                    [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: dailyIntensities_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityDay                    [Unidad: ]
+  • SedentaryMinutes               [Unidad: ]
+  • LightlyActiveMinutes           [Unidad: ]
+  • FairlyActiveMinutes            [Unidad: ]
+  • VeryActiveMinutes              [Unidad: ]
+  • SedentaryActiveDistance        [Unidad: ]
+  • LightActiveDistance            [Unidad: ]
+  • ModeratelyActiveDistance       [Unidad: ]
+  • VeryActiveDistance             [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: dailySteps_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityDay                    [Unidad: ]
+  • StepTotal                      [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: heartrate_seconds_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • Time                           [Unidad: ]
+  • Value                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: hourlyCalories_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: hourlyIntensities_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • TotalIntensity                 [Unidad: ]
+  • AverageIntensity               [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: hourlySteps_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • StepTotal                      [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteCaloriesNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Calories                       [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteCaloriesWide_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • Calories00                     [Unidad: ]
+  • Calories01                     [Unidad: ]
+  • Calories02                     [Unidad: ]
+  • Calories03                     [Unidad: ]
+  • Calories04                     [Unidad: ]
+  • Calories05                     [Unidad: ]
+  • Calories06                     [Unidad: ]
+  • Calories07                     [Unidad: ]
+  • Calories08                     [Unidad: ]
+  • Calories09                     [Unidad: ]
+  • Calories10                     [Unidad: ]
+  • Calories11                     [Unidad: ]
+  • Calories12                     [Unidad: ]
+  • Calories13                     [Unidad: ]
+  • Calories14                     [Unidad: ]
+  • Calories15                     [Unidad: ]
+  • Calories16                     [Unidad: ]
+  • Calories17                     [Unidad: ]
+  • Calories18                     [Unidad: ]
+  • Calories19                     [Unidad: ]
+  • Calories20                     [Unidad: ]
+  • Calories21                     [Unidad: ]
+  • Calories22                     [Unidad: ]
+  • Calories23                     [Unidad: ]
+  • Calories24                     [Unidad: ]
+  • Calories25                     [Unidad: ]
+  • Calories26                     [Unidad: ]
+  • Calories27                     [Unidad: ]
+  • Calories28                     [Unidad: ]
+  • Calories29                     [Unidad: ]
+  • Calories30                     [Unidad: ]
+  • Calories31                     [Unidad: ]
+  • Calories32                     [Unidad: ]
+  • Calories33                     [Unidad: ]
+  • Calories34                     [Unidad: ]
+  • Calories35                     [Unidad: ]
+  • Calories36                     [Unidad: ]
+  • Calories37                     [Unidad: ]
+  • Calories38                     [Unidad: ]
+  • Calories39                     [Unidad: ]
+  • Calories40                     [Unidad: ]
+  • Calories41                     [Unidad: ]
+  • Calories42                     [Unidad: ]
+  • Calories43                     [Unidad: ]
+  • Calories44                     [Unidad: ]
+  • Calories45                     [Unidad: ]
+  • Calories46                     [Unidad: ]
+  • Calories47                     [Unidad: ]
+  • Calories48                     [Unidad: ]
+  • Calories49                     [Unidad: ]
+  • Calories50                     [Unidad: ]
+  • Calories51                     [Unidad: ]
+  • Calories52                     [Unidad: ]
+  • Calories53                     [Unidad: ]
+  • Calories54                     [Unidad: ]
+  • Calories55                     [Unidad: ]
+  • Calories56                     [Unidad: ]
+  • Calories57                     [Unidad: ]
+  • Calories58                     [Unidad: ]
+  • Calories59                     [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteIntensitiesNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Intensity                      [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteIntensitiesWide_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • Intensity00                    [Unidad: ]
+  • Intensity01                    [Unidad: ]
+  • Intensity02                    [Unidad: ]
+  • Intensity03                    [Unidad: ]
+  • Intensity04                    [Unidad: ]
+  • Intensity05                    [Unidad: ]
+  • Intensity06                    [Unidad: ]
+  • Intensity07                    [Unidad: ]
+  • Intensity08                    [Unidad: ]
+  • Intensity09                    [Unidad: ]
+  • Intensity10                    [Unidad: ]
+  • Intensity11                    [Unidad: ]
+  • Intensity12                    [Unidad: ]
+  • Intensity13                    [Unidad: ]
+  • Intensity14                    [Unidad: ]
+  • Intensity15                    [Unidad: ]
+  • Intensity16                    [Unidad: ]
+  • Intensity17                    [Unidad: ]
+  • Intensity18                    [Unidad: ]
+  • Intensity19                    [Unidad: ]
+  • Intensity20                    [Unidad: ]
+  • Intensity21                    [Unidad: ]
+  • Intensity22                    [Unidad: ]
+  • Intensity23                    [Unidad: ]
+  • Intensity24                    [Unidad: ]
+  • Intensity25                    [Unidad: ]
+  • Intensity26                    [Unidad: ]
+  • Intensity27                    [Unidad: ]
+  • Intensity28                    [Unidad: ]
+  • Intensity29                    [Unidad: ]
+  • Intensity30                    [Unidad: ]
+  • Intensity31                    [Unidad: ]
+  • Intensity32                    [Unidad: ]
+  • Intensity33                    [Unidad: ]
+  • Intensity34                    [Unidad: ]
+  • Intensity35                    [Unidad: ]
+  • Intensity36                    [Unidad: ]
+  • Intensity37                    [Unidad: ]
+  • Intensity38                    [Unidad: ]
+  • Intensity39                    [Unidad: ]
+  • Intensity40                    [Unidad: ]
+  • Intensity41                    [Unidad: ]
+  • Intensity42                    [Unidad: ]
+  • Intensity43                    [Unidad: ]
+  • Intensity44                    [Unidad: ]
+  • Intensity45                    [Unidad: ]
+  • Intensity46                    [Unidad: ]
+  • Intensity47                    [Unidad: ]
+  • Intensity48                    [Unidad: ]
+  • Intensity49                    [Unidad: ]
+  • Intensity50                    [Unidad: ]
+  • Intensity51                    [Unidad: ]
+  • Intensity52                    [Unidad: ]
+  • Intensity53                    [Unidad: ]
+  • Intensity54                    [Unidad: ]
+  • Intensity55                    [Unidad: ]
+  • Intensity56                    [Unidad: ]
+  • Intensity57                    [Unidad: ]
+  • Intensity58                    [Unidad: ]
+  • Intensity59                    [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteMETsNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • METs                           [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteSleep_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • date                           [Unidad: ]
+  • value                          [Unidad: ]
+  • logId                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteStepsNarrow_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityMinute                 [Unidad: ]
+  • Steps                          [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: minuteStepsWide_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • ActivityHour                   [Unidad: ]
+  • Steps00                        [Unidad: ]
+  • Steps01                        [Unidad: ]
+  • Steps02                        [Unidad: ]
+  • Steps03                        [Unidad: ]
+  • Steps04                        [Unidad: ]
+  • Steps05                        [Unidad: ]
+  • Steps06                        [Unidad: ]
+  • Steps07                        [Unidad: ]
+  • Steps08                        [Unidad: ]
+  • Steps09                        [Unidad: ]
+  • Steps10                        [Unidad: ]
+  • Steps11                        [Unidad: ]
+  • Steps12                        [Unidad: ]
+  • Steps13                        [Unidad: ]
+  • Steps14                        [Unidad: ]
+  • Steps15                        [Unidad: ]
+  • Steps16                        [Unidad: ]
+  • Steps17                        [Unidad: ]
+  • Steps18                        [Unidad: ]
+  • Steps19                        [Unidad: ]
+  • Steps20                        [Unidad: ]
+  • Steps21                        [Unidad: ]
+  • Steps22                        [Unidad: ]
+  • Steps23                        [Unidad: ]
+  • Steps24                        [Unidad: ]
+  • Steps25                        [Unidad: ]
+  • Steps26                        [Unidad: ]
+  • Steps27                        [Unidad: ]
+  • Steps28                        [Unidad: ]
+  • Steps29                        [Unidad: ]
+  • Steps30                        [Unidad: ]
+  • Steps31                        [Unidad: ]
+  • Steps32                        [Unidad: ]
+  • Steps33                        [Unidad: ]
+  • Steps34                        [Unidad: ]
+  • Steps35                        [Unidad: ]
+  • Steps36                        [Unidad: ]
+  • Steps37                        [Unidad: ]
+  • Steps38                        [Unidad: ]
+  • Steps39                        [Unidad: ]
+  • Steps40                        [Unidad: ]
+  • Steps41                        [Unidad: ]
+  • Steps42                        [Unidad: ]
+  • Steps43                        [Unidad: ]
+  • Steps44                        [Unidad: ]
+  • Steps45                        [Unidad: ]
+  • Steps46                        [Unidad: ]
+  • Steps47                        [Unidad: ]
+  • Steps48                        [Unidad: ]
+  • Steps49                        [Unidad: ]
+  • Steps50                        [Unidad: ]
+  • Steps51                        [Unidad: ]
+  • Steps52                        [Unidad: ]
+  • Steps53                        [Unidad: ]
+  • Steps54                        [Unidad: ]
+  • Steps55                        [Unidad: ]
+  • Steps56                        [Unidad: ]
+  • Steps57                        [Unidad: ]
+  • Steps58                        [Unidad: ]
+  • Steps59                        [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: sleepDay_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • SleepDay                       [Unidad: ]
+  • TotalSleepRecords              [Unidad: ]
+  • TotalMinutesAsleep             [Unidad: ]
+  • TotalTimeInBed                 [Unidad: ]
+
+
+📁 Subcarpeta: Fitabase Data 4.12.16-5.12.16 | 📄 Archivo: weightLogInfo_merged.csv
+-----------------------------------------------------------------
+  • Id                             [Unidad: ]
+  • Date                           [Unidad: ]
+  • WeightKg                       [Unidad: ]
+  • WeightPounds                   [Unidad: ]
+  • Fat                            [Unidad: ]
+  • BMI                            [Unidad: ]
+  • IsManualReport                 [Unidad: ]
+  • LogId                          [Unidad: ]
+
+
