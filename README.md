@@ -41,9 +41,9 @@ El MVP se estructura mediante la integración y *backtesting* de los siguientes 
 ---
 
 ## 🚀 Metodología de Validación
-Para demostrar que "esto funciona", el proyecto se valida mediante:
 
 * **Validación por Backtesting:** Aplicación del modelo sobre el dataset de 4 años de GLOBEM para comprobar si el IS predice con éxito los episodios de uso prolongado registrados.
+  
 * **Taxonomía de Sugerencias:** Clasificación de respuestas según el estado detectado:
     * *Estrés detectado (HRV ↓):* Sugerencias de baja estimulación (respiración, hidratación).
     * *Aburrimiento detectado (Sedentarismo ↑):* Sugerencias de activación (ejercicio, hobbies).
