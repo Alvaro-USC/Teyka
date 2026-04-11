@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto GEM — Gestión del Estado Nervioso</title>
+    <meta name="description" content="Proyecto GEM: De la biometría pasiva a la intervención proactiva. Índice de Saturación (IS) en tiempo real.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- NAV -->
+    <nav id="main-nav">
+        <div class="nav-brand"><span class="nav-icon">💎</span><span class="nav-title">Proyecto GEM</span></div>
+        <div class="nav-links">
+            <a href="#hero" class="nav-link active">Inicio</a>
+            <a href="#is-live" class="nav-link">IS Live</a>
+            <a href="#dual-view" class="nav-link">Visualización</a>
+            <a href="#nudge" class="nav-link">Nudge</a>
+            <a href="#pipeline" class="nav-link">Pipeline</a>
+        </div>
+        <div class="nav-badge">Impacthon 2026</div>
+    </nav>
+
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <section id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">Gestión del Estado Nervioso</div>
+            <h1>No bloquees la pantalla.<br><span class="gradient-text">Entiende por qué no la sueltas.</span></h1>
+            <p class="hero-subtitle">Biometría pasiva como alarma temprana de la pérdida de autorregulación cognitiva. De la detección a la intervención.</p>
+            <div class="hero-stats">
+                <div class="hero-stat"><span class="hero-stat-value" data-target="14">0</span><span class="hero-stat-label">Usuarios Fitbit</span></div>
+                <div class="hero-stat"><span class="hero-stat-value" data-target="40">0</span><span class="hero-stat-label">Participantes GLOBEM</span></div>
+                <div class="hero-stat"><span class="hero-stat-value" data-target="1673">0</span><span class="hero-stat-label">Días-muestra</span></div>
+            </div>
+            <div class="hero-integrations">
+                <div class="integration-badge"><span>📡</span><span>Fitbit HRV</span></div>
+                <div class="integration-badge"><span>📱</span><span>GLOBEM Screen</span></div>
+                <div class="integration-badge"><span>📅</span><span>Google Calendar</span></div>
+                <div class="integration-badge"><span>✨</span><span>Gemini AI</span></div>
+            </div>
+            <a href="#is-live" class="hero-cta">Ver IS en Tiempo Real ↓</a>
+        </div>
+    </section>
+
+    <!-- ═══════════════ IS LIVE ═══════════════ -->
+    <section id="is-live">
+        <div class="section-header">
+            <span class="section-tag">Índice de Saturación (IS) — Basado en Wang, R., Chen, F., Chen, Z. et al. «StudentLife: Assessing Mental Health, Academic Performance and Behavioral Trends», ACM UbiComp, 2021</span>
+            <h2>Índice de Saturación en Vivo</h2>
+            <p>IS = (0.55 × StressScore) + (0.45 × BehaviorScore) — Alerta cuando IS > 75%</p>
+        </div>
+
+        <!-- User selector -->
+        <div class="user-selector" id="user-selector"></div>
+
+        <!-- IS Panel -->
+        <div class="is-panel">
+            <div class="is-gauge-container">
+                <svg viewBox="0 0 180 180" class="is-gauge-svg">
+                    <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="12"/>
+                    <circle cx="90" cy="90" r="78" fill="none" stroke-width="12" stroke-linecap="round"
+                        stroke-dasharray="490" stroke-dashoffset="490" id="is-arc"
+                        transform="rotate(-90 90 90)"/>
+                </svg>
+                <div class="is-gauge-center">
+                    <div class="is-value" id="is-value">0%</div>
+                    <div class="is-label">Índice de<br>Saturación</div>
+                </div>
+            </div>
+
+            <div class="is-scores">
+                <div class="is-score-card">
+                    <div class="isc-header"><span class="isc-icon">💓</span>StressScore<span class="isc-weight">×0.55</span></div>
+                    <div class="isc-value" id="stress-val">0</div>
+                    <div class="isc-bar"><div class="isc-fill" id="stress-fill"></div></div>
+                    <div class="isc-detail" id="stress-detail">RMSSD: — ms</div>
+                </div>
+                <div class="is-score-card">
+                    <div class="isc-header"><span class="isc-icon">📱</span>BehaviorScore<span class="isc-weight">×0.45</span></div>
+                    <div class="isc-value" id="behavior-val">0</div>
+                    <div class="isc-bar"><div class="isc-fill" id="behavior-fill"></div></div>
+                    <div class="isc-detail" id="behavior-detail">Inercia: 0%</div>
+                </div>
+                <div class="is-formula-bar">
+                    <code>IS = (0.55 × <span id="f-stress">0</span>) + (0.45 × <span id="f-behavior">0</span>) = <strong id="f-total">0</strong></code>
+                </div>
+            </div>
+
+            <div class="is-classification">
+                <div class="class-header">Clasificación de Sesión</div>
+                <div class="class-segments" id="class-segments">
+                    <div class="class-seg"><span class="seg-time">🌅 Mañana</span><span class="seg-badge" id="class-morning">—</span></div>
+                    <div class="class-seg"><span class="seg-time">☀️ Tarde</span><span class="seg-badge" id="class-afternoon">—</span></div>
+                    <div class="class-seg"><span class="seg-time">🌆 Noche</span><span class="seg-badge" id="class-evening">—</span></div>
+                    <div class="class-seg"><span class="seg-time">🌙 Madrug.</span><span class="seg-badge" id="class-night">—</span></div>
+                </div>
+                <div class="class-summary">
+                    <div class="class-bar-row"><span class="class-dot green"></span><span>Productivo</span><div class="class-bar-track"><div class="class-bar-fill green" id="prod-fill"></div></div><span id="prod-pct">0%</span></div>
+                    <div class="class-bar-row"><span class="class-dot red"></span><span>Entretenim.</span><div class="class-bar-track"><div class="class-bar-fill red" id="ent-fill"></div></div><span id="ent-pct">0%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- IS Alert -->
+        <div class="is-alert hidden" id="is-alert">
+            <span class="is-alert-pulse"></span>
+            <span class="is-alert-icon">⚠️</span>
+            <span class="is-alert-text"><strong>IS > 75%</strong> — Momento de intervención. Tu sistema nervioso muestra saturación.</span>
+            <span class="is-alert-action" id="is-alert-action">💡 Sugerencia</span>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="kpi-row">
+            <div class="kpi-card"><div class="kpi-icon">📱</div><div class="kpi-val" id="k-screen">0</div><div class="kpi-unit">min</div><div class="kpi-name">Pantalla</div><div class="kpi-bar"><div class="kpi-fill" id="kf-screen"></div></div></div>
+            <div class="kpi-card"><div class="kpi-icon">🚶</div><div class="kpi-val" id="k-steps">0</div><div class="kpi-unit">pasos</div><div class="kpi-name">Actividad</div><div class="kpi-bar"><div class="kpi-fill" id="kf-steps"></div></div></div>
+            <div class="kpi-card"><div class="kpi-icon">🪑</div><div class="kpi-val" id="k-sed">0</div><div class="kpi-unit">min</div><div class="kpi-name">Sedentarismo</div><div class="kpi-bar"><div class="kpi-fill" id="kf-sed"></div></div></div>
+            <div class="kpi-card"><div class="kpi-icon">💓</div><div class="kpi-val" id="k-rmssd">0</div><div class="kpi-unit">ms</div><div class="kpi-name">RMSSD Synth.</div><div class="kpi-bar"><div class="kpi-fill" id="kf-rmssd"></div></div></div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-control">
+            <button class="play-btn" id="play-btn">▶ Reproducir</button>
+            <div class="speed-toggle" id="speed-toggle"><span class="speed-label">Vel.</span><span class="speed-dot active" data-ms="7000"></span><span class="speed-dot" data-ms="3500"></span><span class="speed-dot" data-ms="1500"></span></div>
+            <input type="range" min="0" max="1" value="0" class="timeline-slider" id="timeline-slider">
+            <span class="timeline-date" id="timeline-date">—</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════ DUAL VIEW ═══════════════ -->
+    <section id="dual-view">
+        <div class="section-header">
+            <span class="section-tag">Visualización Dual — Grafana-style</span>
+            <h2>Biometría × Conducta</h2>
+            <p>La caída del HRV alineada con el aumento del uso de pantalla</p>
+        </div>
+        <div class="dual-charts">
+            <div class="chart-box"><canvas id="chart-dual-timeline"></canvas></div>
+        </div>
+        <div class="dual-charts duo">
+            <div class="chart-box half"><canvas id="chart-intraday-screen"></canvas></div>
+            <div class="chart-box half"><canvas id="chart-intraday-is"></canvas></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════ NUDGE ═══════════════ -->
+    <section id="nudge">
+        <div class="section-header">
+            <span class="section-tag">Intervención Proactiva</span>
+            <h2>Sistema de Nudge GEM</h2>
+            <p>Sugerencias de actividad alternativa cuando el Índice de Saturación supera el umbral crítico</p>
+        </div>
+        <div class="nudge-container">
+            <div class="nudge-steps">
+                <div class="nudge-step active" data-n="1"><div class="ns-num">1</div><div class="ns-body"><h4>📡 Monitoreo Pasivo</h4><p>El smartwatch captura variabilidad cardíaca (RMSSD). El móvil registra uso de pantalla y actividad física.</p></div></div>
+                <div class="nudge-step" data-n="2"><div class="ns-num">2</div><div class="ns-body"><h4>🧠 Motor IS</h4><p>StressScore (desviación RMSSD) + BehaviorScore (inercia pantalla/actividad) → IS > 75% → Trigger de intervención.</p></div></div>
+                <div class="nudge-step" data-n="3"><div class="ns-num">3</div><div class="ns-body"><h4>🔔 Nudge Contextual</h4><p>Sugerencia de actividad alternativa adaptada al perfil de intereses y al momento del día.</p></div></div>
+                <div class="nudge-step" data-n="4"><div class="ns-num">4</div><div class="ns-body"><h4>🔄 Aprendizaje Continuo</h4><p>El feedback del usuario ajusta los pesos del motor de recomendación para futuras intervenciones.</p></div></div>
+            </div>
+            <div class="nudge-watch">
+                <div class="watch-frame">
+                    <div class="watch-notch"></div>
+                    <div class="watch-screen" id="watch-screen">
+                        <div id="w-idle">
+                            <div class="w-time" id="w-time">21:45</div>
+                            <div class="w-date">Viernes, 11 Abril</div>
+                            <div class="w-metric"><span>💓</span> 78 BPM</div>
+                            <div class="w-metric"><span>📱</span> IS: 82%</div>
+                        </div>
+                        <div class="hidden" id="w-notif">
+                            <div class="wn-header"><span class="wn-dot"></span>GEM<span class="wn-time">21:45</span></div>
+                            <div class="wn-title" id="wn-title">Momento de desconectar</div>
+                            <div class="wn-body" id="wn-body">
+                                <p>💓 HRV <strong>45% bajo</strong></p>
+                                <p>📱 <strong>5h 23min</strong> pantalla</p>
+                            </div>
+                            <div class="wn-suggestion" id="wn-suggestion">Sal a <strong>caminar 15 min</strong> — tu HRV mejorará un 20%.</div>
+                            <div class="wn-actions">
+                                <button class="wn-btn primary" id="wn-accept">Ahora</button>
+                                <button class="wn-btn secondary" id="wn-later">En 15 min</button>
+                            </div>
+                            <div class="wn-feedback hidden" id="wn-feedback"><span>¿Útil?</span><button class="fb-btn" id="fb-y">👍</button><button class="fb-btn" id="fb-n">👎</button></div>
+                        </div>
+                        <div class="hidden" id="w-ok"><div class="ok-check">✓</div><div class="ok-text">¡Registrado!</div><div class="ok-detail">↑ +12% HRV estimado</div></div>
+                    </div>
+                    <div class="watch-button"></div>
+                </div>
+                <button class="sim-nudge-btn" id="sim-nudge-btn">Simular Alerta IS > 75%</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════ PIPELINE ═══════════════ -->
+    <section id="pipeline">
+        <div class="section-header">
+            <span class="section-tag">Arquitectura GEM</span>
+            <h2>Pipeline de Datos</h2>
+            <p>De la señal biométrica cruda a la intervención personalizada</p>
+        </div>
+        <div class="pipeline-flow">
+            <div class="pipe-stage" data-s="1"><div class="ps-icon">📥</div><h4>Ingesta</h4><code>Fitbit HR + GLOBEM</code><small>Biometría + Conducta</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-stage" data-s="2"><div class="ps-icon">⚙️</div><h4>ETL + Baseline</h4><code>IBI → RMSSD</code><small>Media móvil por usuario</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-stage" data-s="3"><div class="ps-icon">🧠</div><h4>IS Engine</h4><code>0.60×S + 0.40×B</code><small>Clasificación sesiones</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-stage" data-s="4"><div class="ps-icon">🎯</div><h4>Contexto</h4><div class="ps-apis"><span class="api-badge cal">📅 Calendar</span><span class="api-badge gem">✨ Gemini</span></div><small>IS > 75% → Trigger</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-stage" data-s="5"><div class="ps-icon">🔔</div><h4>Nudge GEM</h4><small>Sugerencia personalizada basada en hobbies y agenda</small></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand"><span>💎</span>Proyecto GEM<p>Gestión del Estado Nervioso</p></div>
+            <div class="footer-col"><h4>Datos</h4><span>Fitbit — Fitabase (Kaggle)</span><span>GLOBEM — UW EXP Lab</span></div>
+            <div class="footer-col"><h4>Integraciones</h4><span>Google Calendar API</span><span>Gemini API · Fitbit Web API</span></div>
+        </div>
+        <div class="footer-bottom">Impacthon 2026 — USC · Proyecto GEM</div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

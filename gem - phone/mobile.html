@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>GEM — Tu Estado Nervioso</title>
+    <meta name="description" content="Gestión del Estado Nervioso. Monitoreo biométrico pasivo.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+    <!-- iOS Notification Popup -->
+    <div class="notif-overlay" id="notif-overlay">
+        <div class="notif-card" id="notif-card">
+            <div class="notif-handle"></div>
+            <div class="notif-header">
+                <div class="notif-icon">🧠</div>
+                <div class="notif-app">GEM</div>
+                <div class="notif-time">ahora</div>
+            </div>
+            <div class="notif-title" id="notif-title">Tu cuerpo necesita un descanso</div>
+            <div class="notif-body" id="notif-body">Llevas 3h de pantalla continua. Tu índice de saturación ha superado el umbral.</div>
+            <div class="notif-actions">
+                <button class="notif-btn notif-btn-primary" id="notif-now">Descansar ahora</button>
+                <button class="notif-btn notif-btn-later" id="notif-later">En 15 min</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app" id="app">
+        <!-- Status Bar Mock -->
+        <div class="status-bar">
+            <span class="status-time" id="status-time">12:00</span>
+            <div class="status-icons">
+                <span>📶</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- Swipeable Screens -->
+        <div class="screens-container" id="screens">
+            <!-- Screen 1: Today Chart -->
+            <div class="screen screen-active" id="screen-today">
+                <div class="screen-scroll">
+                    <!-- Header -->
+                    <div class="today-header">
+                        <div class="today-greeting" id="today-greeting">Buenos días</div>
+                        <div class="today-user" id="today-user">Usuario 1</div>
+                        <div class="user-selector-trigger" id="user-trigger">
+                            <span>▾</span>
+                        </div>
+                    </div>
+
+                    <!-- IS Circular Gauge -->
+                    <div class="is-hero">
+                        <div class="is-gauge">
+                            <svg viewBox="0 0 120 120" class="is-ring">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="#F2F2F7" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="52" fill="none" stroke-width="8" stroke-linecap="round"
+                                    id="is-arc" stroke-dasharray="327" stroke-dashoffset="327"
+                                    transform="rotate(-90 60 60)"/>
+                            </svg>
+                            <div class="is-gauge-inner">
+                                <div class="is-number" id="is-number">0</div>
+                                <div class="is-unit">%</div>
+                            </div>
+                        </div>
+                        <div class="is-level" id="is-level">Estado óptimo</div>
+                        <div class="is-level-dot" id="is-level-dot"></div>
+                        <div class="is-date" id="is-date"></div>
+                    </div>
+
+                    <!-- Main Chart -->
+                    <div class="chart-container">
+                        <canvas id="main-chart"></canvas>
+                        <div class="chart-tooltip" id="chart-tooltip">
+                            <div class="tooltip-hour" id="tooltip-hour">14:00</div>
+                            <div class="tooltip-is" id="tooltip-is">45%</div>
+                        </div>
+                    </div>
+
+                    <!-- Time Range Selector -->
+                    <div class="range-selector" id="range-selector">
+                        <button class="range-btn range-active" data-range="day">Hoy</button>
+                        <button class="range-btn" data-range="week">Semana</button>
+                        <button class="range-btn" data-range="month">Mes</button>
+                    </div>
+
+                    <!-- Rest Points Summary -->
+                    <div class="rest-summary" id="rest-summary">
+                        <div class="rest-title">Momentos de descanso sugeridos</div>
+                        <div class="rest-points" id="rest-points"></div>
+                    </div>
+
+                    <!-- Health Connection -->
+                    <div class="health-section">
+                        <div class="health-title">Salud física y mental</div>
+                        <div class="health-grid">
+                            <div class="health-card">
+                                <div class="health-icon">💓</div>
+                                <div class="health-label">RMSSD</div>
+                                <div class="health-value" id="h-rmssd">—</div>
+                                <div class="health-unit">ms</div>
+                                <div class="health-bar"><div class="health-fill" id="hf-rmssd"></div></div>
+                            </div>
+                            <div class="health-card">
+                                <div class="health-icon">🚶</div>
+                                <div class="health-label">Pasos</div>
+                                <div class="health-value" id="h-steps">—</div>
+                                <div class="health-unit">hoy</div>
+                                <div class="health-bar"><div class="health-fill" id="hf-steps"></div></div>
+                            </div>
+                            <div class="health-card">
+                                <div class="health-icon">📱</div>
+                                <div class="health-label">Pantalla</div>
+                                <div class="health-value" id="h-screen">—</div>
+                                <div class="health-unit">min</div>
+                                <div class="health-bar"><div class="health-fill" id="hf-screen"></div></div>
+                            </div>
+                            <div class="health-card">
+                                <div class="health-icon">🧘</div>
+                                <div class="health-label">Actividad</div>
+                                <div class="health-value" id="h-active">—</div>
+                                <div class="health-unit">min</div>
+                                <div class="health-bar"><div class="health-fill" id="hf-active"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stress vs Behavior -->
+                    <div class="decomp-section">
+                        <div class="decomp-title">Descomposición del IS</div>
+                        <div class="decomp-row">
+                            <div class="decomp-card">
+                                <div class="decomp-label">StressScore</div>
+                                <div class="decomp-value" id="d-stress">0</div>
+                                <div class="decomp-weight">×0.55</div>
+                                <div class="decomp-bar"><div class="decomp-fill" id="df-stress"></div></div>
+                            </div>
+                            <div class="decomp-card">
+                                <div class="decomp-label">BehaviorScore</div>
+                                <div class="decomp-value" id="d-behavior">0</div>
+                                <div class="decomp-weight">×0.45</div>
+                                <div class="decomp-bar"><div class="decomp-fill" id="df-behavior"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 2: History Calendar -->
+            <div class="screen" id="screen-history">
+                <div class="screen-scroll">
+                    <div class="history-header">
+                        <h2>Historial</h2>
+                        <div class="history-month" id="history-month">Mayo 2018</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                    <div class="history-chart-container">
+                        <canvas id="history-chart"></canvas>
+                    </div>
+                    <div class="history-stats" id="history-stats"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <button class="nav-btn nav-active" data-screen="0" id="nav-today">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Hoy</span>
+            </button>
+            <button class="nav-btn" data-screen="1" id="nav-history">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Historial</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- User Selector Modal -->
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal-card">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Seleccionar perfil</div>
+            <div class="user-list" id="user-list"></div>
+        </div>
+    </div>
+
+    <!-- Day Selector Modal -->
+    <div class="modal-overlay" id="day-modal">
+        <div class="modal-card">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Seleccionar día</div>
+            <div class="day-slider-container">
+                <input type="range" id="day-slider" min="0" max="10" value="0" class="day-slider">
+                <div class="day-slider-label" id="day-slider-label">Día 1</div>
+            </div>
+            <button class="modal-done" id="day-done">Hecho</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="mobile.js"></script>
+</body>
+</html>
