@@ -18,7 +18,7 @@ python -m http.server 8096
 cd "gem - phone"
 python -m http.server 8097
 # Abrir en el navegador la app móvil: http://localhost:8097/mobile.html
-Presionar Shift + o para ejecutar el Onboarding de la APP.
+# Presionar Shift + o para ejecutar el Onboarding de la APP.
 ```
 [http://localhost:8097/mobile.html](http://localhost:8097/mobile.html)
 
