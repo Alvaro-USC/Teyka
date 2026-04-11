@@ -1,4 +1,4 @@
-# Proyecto GEM — Documentación Técnica Completa
+# Proyecto Teyka — Documentación Técnica Completa
 
 > **Gestión del Estado Nervioso**  
 > De la biometría pasiva a la intervención proactiva.  
@@ -8,7 +8,7 @@
 
 ## 1. Visión General
 
-El Proyecto GEM propone un cambio de paradigma: pasar del **bloqueo reactivo de aplicaciones** a la **gestión proactiva del estado nervioso**. Utilizamos la biometría como "alarma temprana" de la pérdida de autorregulación cognitiva.
+El Proyecto Teyka propone un cambio de paradigma: pasar del **bloqueo reactivo de aplicaciones** a la **gestión proactiva del estado nervioso**. Utilizamos la biometría como "alarma temprana" de la pérdida de autorregulación cognitiva.
 
 El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina estrés fisiológico (variabilidad cardíaca) con patrones de comportamiento digital (uso de pantalla, actividad física). Cuando el IS supera el **umbral crítico del 70%** y el usuario se halla en un estado cognitivo **de inercia u Ocio**, el sistema genera una **intervención proactiva context-aware (Nudge)** sugiriendo medidas correctoras estructuradas a través del asistente de Inteligencia Artificial.
 ### Referencia Académica
@@ -23,13 +23,13 @@ El proyecto se divide en **tres productos** independientes:
 
 ```
 Impacthon/
-├── gem/                   ← Dashboard de presentación + Panel Admin
+├── Teyka/                   ← Dashboard de presentación + Panel Admin
 │   ├── index.html         ← Dashboard público (pitch Impacthon)
 │   ├── admin.html         ← Panel de investigación y data mining
 │   ├── extract_gem.py     ← ETL pipeline (IS diario + sesiones)
 │   └── gem_data.json      ← Datos procesados
 │
-├── gem - phone/           ← App Móvil de Salud (usuario final)
+├── Teyka - phone/           ← App Móvil de Salud (usuario final)
 │   ├── mobile.html        ← App iOS-style con IS intradía
 │   ├── mobile.css/js      ← Frontend móvil completo
 │   ├── extract_gem.py     ← ETL pipeline v4 (IS horario)
@@ -42,9 +42,9 @@ Impacthon/
 
 | Producto | Público | Descripción |
 |---|---|---|
-| **Dashboard Pitch** (`gem/index.html`) | Jurado / público | Dashboard visual para la presentación del Impacthon. Hero, IS Live, gráficos, simulador de nudge |
-| **Admin Panel** (`gem/admin.html`) | Investigadores | Panel con observabilidad, datos agregados, correlaciones, logs de alertas, banco de pruebas, exportación CSV/JSON |
-| **App Móvil** (`gem - phone/mobile.html`) | Usuario final | App de salud estilo iOS con gráfico intradía Trade Republic, notificaciones push, historial calendárico |
+| **Dashboard Pitch** (`Teyka/index.html`) | Jurado / público | Dashboard visual para la presentación del Impacthon. Hero, IS Live, gráficos, simulador de nudge |
+| **Admin Panel** (`Teyka/admin.html`) | Investigadores | Panel con observabilidad, datos agregados, correlaciones, logs de alertas, banco de pruebas, exportación CSV/JSON |
+| **App Móvil** (`Teyka - phone/mobile.html`) | Usuario final | App de salud estilo iOS con gráfico intradía Trade Republic, notificaciones push, historial calendárico |
 
 ---
 
@@ -72,7 +72,7 @@ Impacthon/
 
 #### Variables de Screen (por segmento: morning/afternoon/evening/night/allday)
 
-| Variable RAPIDS | Descripción | Uso en GEM |
+| Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumdurationunlock` | Suma total de tiempo con pantalla desbloqueada (min) | **screen_min** — Tiempo total de pantalla |
 | `countepisodeunlock` | Número de veces que se desbloqueó el teléfono | **unlocks** — Frecuencia de uso |
@@ -83,7 +83,7 @@ Impacthon/
 
 #### Variables de Steps (por segmento)
 
-| Variable RAPIDS | Descripción | Uso en GEM |
+| Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumsteps` | Suma total de pasos | **steps** — Nivel de actividad física |
 | `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) | ⚠️ Ver corrección abajo |
@@ -99,7 +99,7 @@ sedentary_bout = tiempo_total_segmento - active_bout
 
 Cada segmento tiene ~360 min (6 horas), por lo que el `allday` reporta ~1200-1400 min (20-23h), incluyendo **sueño e inactividad total**. Esto NO es sedentarismo en el sentido clínico.
 
-**Corrección aplicada en GEM:**
+**Corrección aplicada en Teyka:**
 ```python
 real_sedentary = 960 - active_min_allday  # 960 = 16 horas despierto
 ```
@@ -121,7 +121,7 @@ Esto da valores realistas de 600-860 min de sedentarismo diurno, que es el compl
 
 Existen **dos versiones** del ETL pipeline, una para cada producto:
 
-### 4.1 ETL v4 Hybrid — Dashboard + Admin (`gem/extract_gem.py`)
+### 4.1 ETL v4 Hybrid — Dashboard + Admin (`Teyka/extract_gem.py`)
 
 Genera datos con resolución **diaria**. Usa sigmoide logística sobre CD para BehaviorScore + StressScore lineal.
 
@@ -163,7 +163,7 @@ GLOBEM (4 cohortes × screen.csv + steps.csv)
 }
 ```
 
-### 4.2 ETL v4 — App Móvil (`gem - phone/extract_gem.py`)
+### 4.2 ETL v4 — App Móvil (`Teyka - phone/extract_gem.py`)
 
 Genera datos con resolución **horaria** (24 data points por día) para el gráfico intradía.
 
@@ -307,7 +307,7 @@ if screen > 500 and steps < 3000: IS = max(IS, 75)
 
 ### 5.5 IS Horario (App Móvil)
 
-En la versión intradía (`gem - phone/extract_gem.py`), el IS se calcula **por hora** con mayor sensibilidad:
+En la versión intradía (`Teyka - phone/extract_gem.py`), el IS se calcula **por hora** con mayor sensibilidad:
 
 ```python
 # Umbrales horarios (más sensibles que diarios)
@@ -394,21 +394,24 @@ El sedentarismo del día (corregido: 960 - active_min) contribuye al 40% de la c
 ### 8.1 Disparador Dual (Dual-Condition Trigger)
 Siguiendo la prevención de falsos positivos, la intervención preventiva requiere inequívocamente: **(IS > 70% AND app_type == 'non-productive')**.
 
-### 8.2 Flujo Operativo AI
+### 8.2 Flujo Operativo AI (Generative AI Integration)
+
+La app incorpora **Teyka AI**, un motor de intervención impulsado por **Google Gemini 1.5 Flash** (vía Vertex AI / REST API) embebido en el frontend. El pipeline operativo es:
 
 ```
 1. 📡 Monitoreo Pasivo
-   → Smartwatch captura RMSSD, móvil registra pantalla y patrón de uso de apps
+   → Smartwatch captura RMSSD, móvil registra pantalla y uso.
 
 2. 🧠 Evaluación Dual (Stress + Context)
-   → StressScore + BehaviorScore → Evalúa si el tipo de uso actual es Ocio y supera el 70%
+   → Si el Índice de Saturación (IS) supera el 70% bajo un foco inercial de Ocio, se activa la capa de inferencia.
 
-3. ✨ Generación AI (Gemini)
-   → El modal simula "Gemini calculando nudge...", procesando métricas horarias y leyendo hobbies en tiempo real.
-   → Proporciona un nudging context-aware pasivo (ej: dar un paseo, meditar 15 min con Apple Music).
+3. ✨ Generación Semántica (Teyka AI)
+   → El cliente web monta un 'System Prompt' al milisegundo fusionando el IS actual + las Aficiones (Hobbies) guardadas del usuario en LocalStorage (incluyendo las creadas a mano).
+   → Inyecta a la API de lenguaje: "Escribe una orden de 8 palabras, amable y directa, sobre cómo usar [este hobby específico] para relajar su estrés ahora mismo".
+   → La API sintetiza texto y la UI oscurece el fondo mientras "calcula el nudge".
 
-4. 🔄 Cierre de Ciclo
-   → Confirmación temporal y supresión del gráfico de saturación.
+4. 🛡️ Tolerancia a Fallos (Graceful Degradation)
+   → Dado el entorno volátil de hackathon, si las *API Keys* se agotan o el servidor de Google rechaza la llamada, la función en JS atrapa el `catch()` y recurre silenciosamente a un diccionario de plantillas de Fallback (Offline Mode). El usuario siempre recibe su intervención biométrica estructurada al instante.
 ```
 
 ### 8.3 Inyección Estocástica de Datos (Visual Demo)
@@ -417,16 +420,16 @@ Para que las pruebas, el jurado, y los simulacros de App sean creíbles sin depe
 - Esto garantiza curvas completamente orgánicas y realistas que disparan la alarma a horas de pico naturales según el histórico del `UserIdx`.
 
 ### 8.4 Implementación en App Móvil
-La app móvil (`gem - phone/mobile.html`) implementa **notificaciones estilo nativas iOS** que:
-- Surgen como Pop-ups translúcidos integrando un timer.
-- Muestran el *IS* instantáneo, minutos sumados, y recomendaciones dictaminadas por Gemini.
-- Desvían con "Descansar ahora" o "Posponer 15 min".
-- Empujan **Haptic feedback** vibratorio (`navigator.vibrate([100,50,100])`) disparando alertas cinestésicas vinculadas al peligro cognitivo.
+La app móvil (`gem - phone/mobile.html`) implementa **notificaciones inmersivas "Focus Interventions"** que:
+- Oscurecen agresivamente toda la pantalla mediante `backdrop` degradado para interceptar irremediablemente el patrón de scroll (Doom-scrolling).
+- Muestran el *IS* instantáneo, minutos devorados, y el mensaje dictaminado sintéticamente por Gemini.
+- Empujan **Haptic feedback** vibratorio (`navigator.vibrate([100,50,100])`) disparando alertas cinestésicas.
+- Fuerzan la toma de decisión: "Descansar ahora" o "Posponer 15 min".
 ---
 
 ## 9. Productos y Funcionalidades
 
-### 9.1 Dashboard Pitch (`gem/index.html`)
+### 9.1 Dashboard Pitch (`Teyka/index.html`)
 
 Dashboard visual para la presentación del Impacthon. Estética dark Grafana-style.
 
@@ -438,7 +441,7 @@ Dashboard visual para la presentación del Impacthon. Estética dark Grafana-sty
 | **Sistema de Nudge** | Simulador de notificación en smartwatch |
 | **Pipeline** | Diagrama visual de la arquitectura |
 
-### 9.2 Panel de Administración (`gem/admin.html`)
+### 9.2 Panel de Administración (`Teyka/admin.html`)
 
 Panel de investigación para data mining y observabilidad. Dark theme profesional con sidebar.
 
@@ -451,7 +454,7 @@ Panel de investigación para data mining y observabilidad. Dark theme profesiona
 | **Banco de Pruebas** | Simulador de pesos W₁/W₂ con sliders. Recalcula IS en tiempo real y muestra histograma dual (original vs simulado), delta IS, días críticos simulados |
 | **Exportar** | Descarga CSV y JSON de todos los datos procesados |
 
-### 9.3 App Móvil (`gem - phone/mobile.html`)
+### 9.3 App Móvil (`Teyka - phone/mobile.html`)
 
 App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil con frame de teléfono en desktop.
 
@@ -467,6 +470,34 @@ App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil
 | **Descomposición IS** | StressScore y BehaviorScore con los pesos del motor (0.55 / 0.45). |
 | **Historial Dinámico** | Cajas calendáricas interactivas coloreadas, con una curva continua y estadísticas descriptivas matemáticas superpuestas. |
 | **Notificación IA** | Pop-up nativo emulando Gemini, recabando métricas al milisegundo y arrojando una alerta inmersiva por saturación Ocio + IS. |
+
+#### 9.4 Onboarding y Personalización (`Teyka - phone/mobile.js`)
+
+Al abrir la app por primera vez, el usuario recorre un **flujo de bienvenida animado** de 6 pasos. Este flujo sólo aparece una vez (persistido en `localStorage`).
+
+| Paso | Pantalla | Descripción |
+|---|---|---|
+| 0 | **Bienvenida** | Splash con anillo SVG animado pulsante, nombre del proyecto "Teyka" en rojo, y descripción breve. Se auto-avanza a los 3.5 segundos. |
+| 1 | **Índice de Saturación** | Tooltip sobre el gauge circular IS. El fondo se vuelve semitransparente (modo tour) para mostrar la app real detrás. |
+| 2 | **Gráfica Intradía** | Tooltip explicando las zonas rojas (ocio tóxico) vs azules (productivas) y la línea umbral del 70%. |
+| 3 | **Métricas de Salud** | Tooltip apuntando hacia las health cards (RMSSD, Pasos, Pantalla, Actividad). |
+| 4 | **Alertas Inteligentes** | Tooltip centrado con previsualización de una notificación de Gemini. |
+| 5 | **Selector de Hobbies** | Panel de selección de intereses (12 predefinidos + campo "Otro") que persisten en `localStorage` y alimentan las sugerencias de las notificaciones. |
+
+**Personalización de Notificaciones:**
+Los hobbies seleccionados durante el onboarding se almacenan en `localStorage.gem_hobbies`. Cuando el sistema detecta una saturación crítica y genera una notificación Gemini, la función `getHobbySuggestion()` elige aleatoriamente entre los hobbies del usuario para generar sugerencias contextuales como _"pon tu playlist favorita y relájate"_ o _"lee un capítulo de tu libro"_.
+
+**Reset del onboarding (desarrollo/demo):**
+
+Para realizar simulacros durante el Impacthon de forma rápida, puedes forzar el reinicio completo del tour pulsando el atajo de teclado:
+**`Shift` + `O`** dentro de la webapp (limpia la caché y recarga la interfaz sola).
+
+Alternativamente, desde la consola del navegador:
+```javascript
+localStorage.removeItem('gem_onboarded');
+localStorage.removeItem('gem_hobbies');
+location.reload();
+```
 
 ---
 
@@ -489,7 +520,7 @@ App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil
 ```
 Impacthon/
 │
-├── gem/                           # Dashboard + Admin Panel
+├── Teyka/                           # Dashboard + Admin Panel
 │   ├── extract_gem.py             # ETL v3: IS diario + sesiones → gem_data.json
 │   ├── gem_data.json              # Datos procesados (8 usuarios × ~40 días, resolución diaria)
 │   ├── index.html                 # Dashboard público (pitch Impacthon)
@@ -500,7 +531,7 @@ Impacthon/
 │   ├── admin.js                   # Charts, tablas, correlaciones, sandbox, exports
 │   └── README.md                  # Esta documentación
 │
-├── gem - phone/                   # App Móvil (usuario final)
+├── Teyka - phone/                   # App Móvil (usuario final)
 │   ├── extract_gem.py             # ETL v4: IS horario intradía → gem_data.json
 │   ├── gem_data.json              # Datos procesados (resolución horaria, 24 pts/día)
 │   ├── mobile.html                # App SPA (swipeable screens)
@@ -593,7 +624,7 @@ Selecting diverse profiles...
 Fitbit users: 14, GLOBEM users: 8
 ```
 
-Esto genera `gem/gem_data.json` (~718KB) con datos de resolución diaria.
+Esto genera `Teyka/gem_data.json` (~718KB) con datos de resolución diaria.
 
 ### 12.4 Generar datos para App Móvil (`gem - phone/`)
 
@@ -617,13 +648,36 @@ python -m http.server 8096
 # Admin Panel:   http://localhost:8096/admin.html
 ```
 
-**Terminal 2 — App Móvil (Puerto 8097):**
+**Terminal 2 — App Móvil Teyka (Puerto 8097):**
 ```bash
 cd "gem - phone"
 python -m http.server 8097
 
-# App Móvil UI: http://localhost:8097/mobile.html
+# App Móvil (Simulador): http://localhost:8097/mobile.html
 ```
+
+#### Probar Onboarding vs Sin Onboarding (App Móvil)
+
+El User Journey de Teyka incluye una demostración de **Onboarding de primera apertura** y selección de hobbies, controlada a nivel de navegador.
+
+*   **Para probar la app CON el Onboarding (Simular primer uso):**
+    Una vez dentro de `localhost:8097/mobile.html`, abre la Consola del Desarrollador (F12) y ejecuta:
+    ```javascript
+    localStorage.removeItem('gem_onboarded');
+    localStorage.removeItem('gem_hobbies');
+    location.reload();
+    ```
+    Verás el Splash Screen, la previsualización interactiva de Teyka AI, el tour dinámico con fondo traslúcido y la asignación de roles.
+
+*   **Para probar la app SIN el Onboarding (Simular uso diario recurrente):**
+    Si completas el onboarding pulsando el botón rojo "Empezar" en la tarjeta de aficiones, tu sesión quedará guardada.
+    Para simularlo artificialmente sin ver el tour, en consola:
+    ```javascript
+    localStorage.setItem('gem_onboarded', '1');
+    location.reload();
+    ```
+    La aplicación omitirá el bloqueo, saltando directamente a la Home con el "Resumen de ayer" y las mediciones listas.
+
 
 > **Tip Mobile:** En Chrome/Edge DevTools (F12), usa el *Device Toolbar Toggle* (`Ctrl+Shift+M`) y selecciona un dispositivo como "iPhone 14 Pro" para manipular la app móvil en su factor de forma nativo y activar los eventos Touch.
 
@@ -632,9 +686,9 @@ python -m http.server 8097
 Al ser aplicaciones 100% estáticas (Vanilla JS/HTML/CSS sin Backend), servidas sobre el JSON estático pre-computado (`gem_data.json`), su despliegue es trivial, increíblemente rápido y altamente escalable.
 
 Se recomienda la siguiente topología de accesos:
-- `gem.tudominio.com` → Pitch Dashboard (Público)
-- `gem.tudominio.com/admin.html` → Admin Panel (Investigadores)
-- `app.gem.com` *(o gem.tudominio.com/app)* → App Móvil (Usuario final)
+- `Teyka.tudominio.com` → Pitch Dashboard (Público)
+- `Teyka.tudominio.com/admin.html` → Admin Panel (Investigadores)
+- `app.Teyka.com` *(o Teyka.tudominio.com/app)* → App Móvil (Usuario final)
 
 #### Opción A — Servidor Nginx (Recomendado para VPS propios)
 
@@ -643,26 +697,26 @@ Ejemplo de bloque `server` para configurar ambos productos en el mismo host pero
 ```nginx
 server {
     listen 80;
-    server_name gem.tudominio.com;
+    server_name Teyka.tudominio.com;
 
     # Producto 1: Dashboard y Admin (Root path)
     location / {
-        alias /var/www/gem/;
+        alias /var/www/Teyka/;
         index index.html;
         try_files $uri $uri/ =404;
     }
 
     # Producto 2: App Móvil (Sub-path)
     location /app/ {
-        alias /var/www/gem-phone/;
+        alias /var/www/Teyka-phone/;
         index mobile.html;
         try_files $uri $uri/ =404;
     }
 }
 ```
 *Pasos:* 
-1. Subir contenidos de `gem/` a `/var/www/gem/`
-2. Subir contenidos de `gem - phone/` a `/var/www/gem-phone/`
+1. Subir contenidos de `Teyka/` a `/var/www/Teyka/`
+2. Subir contenidos de `Teyka - phone/` a `/var/www/Teyka-phone/`
 3. Asegurar que cada carpeta incluye su respectivo `gem_data.json`.
 
 #### Opción B — Vercel / Netlify / Cloudflare Pages (Serverless)
@@ -671,13 +725,13 @@ La forma más rápida. Se deben crear **dos proyectos separados** en tu cuenta (
 
 **Proyecto 1 (Web Principal):**
 - Conectar Repositorio GitHub.
-- **Root Directory:** `gem/`
+- **Root Directory:** `Teyka/`
 - **Build Command:** *(dejar vacío)*
-- **Output Directory:** `.` o `gem/`
+- **Output Directory:** `.` o `Teyka/`
 
 **Proyecto 2 (La App):**
 - Conectar Repositorio GitHub.
-- **Root Directory:** `gem - phone/`
+- **Root Directory:** `Teyka - phone/`
 - **Build Command:** *(dejar vacío)*
 - Opcionalmente añade un *Redirect* en la configuración del proveedor para que la raíz `/` envíe automáticamente a `/mobile.html`.
 
@@ -690,9 +744,9 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copia de Dashboard
-COPY ./gem /usr/share/nginx/html/
+COPY ./Teyka /usr/share/nginx/html/
 # Copia de Mobile app en subcarpeta app/
-COPY ./gem\ -\ phone /usr/share/nginx/html/app/
+COPY ./Teyka\ -\ phone /usr/share/nginx/html/app/
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

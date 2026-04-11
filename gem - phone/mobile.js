@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   GEM Mobile — App Logic
+   Teyka Mobile — App Logic
    Trade Republic chart + Swipe + iOS Notifications
    Rest periods: vertical red bands instead of dots
    ═══════════════════════════════════════════════════════════════ */
@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     initRangeSelector();
     initBottomNav();
     initNotification();
+    initOnboarding();
     selectUser(0);
+    showDailySummary();
 });
 
 function updateClock() {
@@ -128,6 +130,9 @@ function selectUser(idx) {
     updateGreeting(user.id);
     renderDay();
     renderHistory();
+    if (localStorage.getItem('gem_onboarded')) {
+        showDailySummary();
+    }
 }
 
 // ─── Render Day View ────────────────────────────────────────
@@ -769,6 +774,7 @@ function initNotification() {
 
 function showNotification(day) {
     if (state.notifShown) return;
+    if (!localStorage.getItem('gem_onboarded')) return; // Block notifications from interrupting the onboarding tour
     state.notifShown = true;
 
     const notifPoint = day.hourly.filter(h => h.is > 70 && h.app_type === 'non-productive').reduce((a, b) => a.is > b.is ? a : b, {is: 0, hour: 0});
@@ -782,16 +788,19 @@ function showNotification(day) {
     titleEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>Gemini calculando nudge...';
     bodyEl.innerHTML = `<span style="opacity:0.7">Saturación crítica (IS ${Math.round(notifPoint.is)}%) detectada en zona horaria no productiva. Generando sugerencia contextual...</span>`;
     card.classList.add('notif-visible');
+    document.getElementById('notif-overlay').classList.add('notif-visible');
 
-    setTimeout(() => {
+    setTimeout(async () => {
+        const suggestion = await getHobbySuggestion(state.userIdx === 0);
         titleEl.textContent = 'Tu mente necesita un descanso';
-        bodyEl.innerHTML = `Llevas <strong>${screenTotal} min</strong> de pantalla hoy y alcanzaste un <strong>${Math.round(notifPoint.is)}% IS</strong> a las ${notifPoint.hour}:00 durante uso no productivo.<br><br>💡 Nuestro modelo sugiere que salgas a <strong>caminar 15 min mientras escuchas música</strong> para reducir el estrés.`;
+        bodyEl.innerHTML = `Llevas <strong>${screenTotal} min</strong> de pantalla hoy y alcanzaste un <strong>${Math.round(notifPoint.is)}% IS</strong> a las ${notifPoint.hour}:00 durante uso no productivo.<br><br>Teyka sugiere que podrías <strong>${suggestion}</strong> para reducir el estrés.`;
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    }, 2500);
+    }, 1500);
 }
 
 function dismissNotif() {
     document.getElementById('notif-card').classList.remove('notif-visible');
+    document.getElementById('notif-overlay').classList.remove('notif-visible');
 }
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -807,3 +816,340 @@ function setBar(id, pct, color) {
         el.style.background = color;
     }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DAILY SUMMARY (Yesterday Recap)
+// ═══════════════════════════════════════════════════════════════
+
+function showDailySummary() {
+    if (!localStorage.getItem('gem_onboarded')) return; // Block daily summary from covering up the UI during onboarding
+    const card = document.getElementById('daily-summary');
+    if (!card || !DATA) return;
+
+    const user = DATA.users[state.userIdx];
+    if (!user || user.days.length < 2) return;
+
+    // "Yesterday" = day index 1 (day 0 is today)
+    const yesterday = user.days[1];
+    if (!yesterday || !yesterday.hourly) return;
+
+    // Inject stochastic context to yesterday if not done
+    if (!yesterday._demoInjected) {
+        yesterday._demoInjected = true;
+        let sum = 0;
+        let alertCount = 0;
+        yesterday.hourly.forEach(h => {
+            if (h.hour < 8) h.app_type = 'inactive';
+            else if (h.hour < 14) h.app_type = Math.random() > 0.25 ? 'productive' : 'non-productive';
+            else if (h.hour < 16) h.app_type = Math.random() > 0.45 ? 'non-productive' : 'productive';
+            else if (h.hour < 20) h.app_type = Math.random() > 0.35 ? 'productive' : 'non-productive';
+            else h.app_type = Math.random() > 0.5 ? 'productive' : 'non-productive';
+            h.is = Math.max(0, Math.min(100, (h.is || 0) + (Math.random() * 16 - 8)));
+        });
+        // Force a high ocio peak
+        const peakH = 14 + Math.floor(Math.random() * 6);
+        if (yesterday.hourly[peakH]) {
+            yesterday.hourly[peakH].app_type = 'non-productive';
+            yesterday.hourly[peakH].is = 75 + Math.random() * 15;
+        }
+
+        // Re-calculate daily_is and alerts for history synchronization
+        yesterday.hourly.forEach(h => {
+            sum += h.is;
+            if (h.is >= 70 && h.app_type === 'non-productive') alertCount++;
+        });
+        yesterday.daily_is = sum / yesterday.hourly.length;
+        yesterday.alerts = alertCount;
+    }
+
+    // Find peak IS hour
+    let peakHour = yesterday.hourly[0];
+    yesterday.hourly.forEach(h => { if (h.is > peakHour.is) peakHour = h; });
+
+    const peakIS = Math.round(peakHour.is);
+    if (peakIS < 40) return; // nothing interesting to report
+
+    // Find recovery: lowest IS after the peak hour
+    const afterPeak = yesterday.hourly.filter(h => h.hour > peakHour.hour);
+    const recoveryHour = afterPeak.length
+        ? afterPeak.reduce((a, b) => a.is < b.is ? a : b)
+        : null;
+
+    const drop = recoveryHour ? Math.round(peakHour.is - recoveryHour.is) : 0;
+    const peakType = peakHour.app_type === 'non-productive' ? 'ocio' : peakHour.app_type === 'productive' ? 'trabajo' : 'inactividad';
+
+    // Populate card
+    document.getElementById('ds-peak-val').textContent = peakIS + '%';
+    document.getElementById('ds-detail').innerHTML = 
+        `Ayer a las <strong>${peakHour.hour}:00</strong> alcanzaste un pico de <strong>${peakIS}% IS</strong> durante un periodo de <strong>${peakType}</strong>. ` +
+        `Llevabas <strong>${Math.round(yesterday.screen_total)} min</strong> de pantalla.`;
+
+    const resultEl = document.getElementById('ds-result');
+    if (drop >= 15) {
+        resultEl.className = 'ds-result ds-result-good';
+        resultEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span>Tras la recomendación, tu IS bajó <strong>${drop} puntos porcentuales</strong> hasta las ${recoveryHour.hour}:00.</span>`;
+    } else if (drop > 0) {
+        resultEl.className = 'ds-result ds-result-neutral';
+        resultEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg><span>Tu IS se redujo ${drop} puntos porcentuales. Intenta desconectar más hoy.</span>`;
+    } else {
+        resultEl.className = 'ds-result ds-result-neutral';
+        resultEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg><span>Tu IS no bajó tras el pico. Intenta tomarte un descanso antes hoy.</span>`;
+    }
+
+    card.style.display = 'block';
+
+    // Close button
+    document.getElementById('ds-close').onclick = () => {
+        card.style.display = 'none';
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ONBOARDING FLOW
+// ═══════════════════════════════════════════════════════════════
+
+const OB_STEPS = ['ob-welcome', 'ob-gauge', 'ob-chart', 'ob-health', 'ob-notif', 'ob-hobbies'];
+let obStep = 0;
+let userHobbies = [];
+
+function initOnboarding() {
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay) return;
+
+    // Already completed → skip
+    if (localStorage.getItem('gem_onboarded')) {
+        overlay.classList.add('ob-hidden');
+        setTimeout(() => overlay.remove(), 600);
+        return;
+    }
+
+    // Auto-advance from welcome after 3.5s
+    setTimeout(() => {
+        if (obStep === 0) advanceOnboarding();
+    }, 3500);
+
+    // Next button
+    document.getElementById('ob-next-btn').addEventListener('click', advanceOnboarding);
+
+    // Hobby tags toggle
+    document.getElementById('ob-tags').addEventListener('click', (e) => {
+        const tag = e.target.closest('.ob-tag');
+        if (!tag) return;
+        tag.classList.toggle('ob-tag-active');
+        const hobby = tag.dataset.hobby;
+        if (tag.classList.contains('ob-tag-active')) {
+            if (!userHobbies.includes(hobby)) userHobbies.push(hobby);
+        } else {
+            userHobbies = userHobbies.filter(h => h !== hobby);
+        }
+    });
+
+    // Custom hobby input
+    const customInput = document.getElementById('ob-custom-input');
+    const customAdd = document.getElementById('ob-custom-add');
+    
+    function addCustomHobby() {
+        const val = customInput.value.trim();
+        if (!val) return;
+        
+        // Create new tag
+        const btn = document.createElement('button');
+        btn.className = 'ob-tag ob-tag-active';
+        btn.dataset.hobby = val.toLowerCase();
+        btn.textContent = val;
+        document.getElementById('ob-tags').appendChild(btn);
+        userHobbies.push(val.toLowerCase());
+        customInput.value = '';
+    }
+    
+    customAdd.addEventListener('click', addCustomHobby);
+    customInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addCustomHobby(); }
+    });
+
+    // Done button (finish onboarding)
+    document.getElementById('ob-done-btn').addEventListener('click', finishOnboarding);
+}
+
+function advanceOnboarding() {
+    if (obStep >= OB_STEPS.length - 1) return;
+
+    const current = document.getElementById(OB_STEPS[obStep]);
+    current.classList.remove('ob-step-active');
+
+    obStep++;
+    const next = document.getElementById(OB_STEPS[obStep]);
+    if (next) {
+        next.classList.add('ob-step-active');
+        
+        const scrollContainer = document.querySelector('.screen-scroll');
+        if (scrollContainer) {
+            if (OB_STEPS[obStep] === 'ob-health') {
+                scrollContainer.scrollTo({top: scrollContainer.scrollHeight, behavior: 'smooth'});
+            } else if (OB_STEPS[obStep] === 'ob-gauge' || OB_STEPS[obStep] === 'ob-chart') {
+                scrollContainer.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        }
+    }
+
+    // Update dots
+    document.querySelectorAll('.ob-dot').forEach((d, i) => {
+        d.classList.toggle('ob-dot-active', i === obStep);
+    });
+
+    // Toggle overlay transparency for tour steps (1-4) so app is visible behind
+    const overlay = document.getElementById('onboarding-overlay');
+    if (obStep >= 1 && obStep <= 4) {
+        overlay.classList.add('ob-tour-mode');
+    } else {
+        overlay.classList.remove('ob-tour-mode');
+    }
+
+    // Hide nav on last step (hobby selector has its own "Empezar" button)
+    const nav = document.getElementById('ob-nav');
+    if (obStep === OB_STEPS.length - 1) {
+        nav.classList.add('ob-nav-hidden');
+    } else {
+        nav.classList.remove('ob-nav-hidden');
+    }
+}
+
+function finishOnboarding() {
+    // Si el usuario escribió un hobby a mano y no le dio al símbolo '+' (entró directo a Empezar)
+    const customInput = document.getElementById('ob-custom-input');
+    if (customInput) {
+        const val = customInput.value.trim();
+        if (val && !userHobbies.includes(val)) {
+            userHobbies.push(val);
+        }
+    }
+
+    // Save hobbies and flag
+    localStorage.setItem('gem_hobbies', JSON.stringify(userHobbies));
+    localStorage.setItem('gem_onboarded', '1');
+
+    const overlay = document.getElementById('onboarding-overlay');
+    overlay.classList.add('ob-hidden');
+    setTimeout(() => overlay.remove(), 600);
+
+    // Volver al bloque principal al entrar a la app real
+    const scrollContainer = document.querySelector('.screen-scroll');
+    if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// ─── Hobby-aware notification suggestions (Gemini AI + Fallback) ──
+async function getHobbySuggestion(useGemini = true) {
+    const stored = localStorage.getItem('gem_hobbies');
+    const hobbies = stored ? JSON.parse(stored) : [];
+    
+    // Configuración API: Leemos dinámicamente el .env
+    let API_KEY = "";
+    try {
+        const envRes = await fetch('../.env');
+        if (!envRes.ok) throw new Error(`HTTP ${envRes.status}`);
+        const envText = await envRes.text();
+        const match = envText.match(/key=([^\r\n]+)/i);
+        if (match) API_KEY = match[1].trim();
+        console.log("✅ API KEY cargada desde ../.env");
+    } catch (e) {
+        console.warn("⚠️ Falló ../.env, intentando .env local. Error:", e.message);
+        try {
+            const envResChild = await fetch('.env');
+            if (!envResChild.ok) throw new Error(`HTTP ${envResChild.status}`);
+            const envTextChild = await envResChild.text();
+            const matchChild = envTextChild.match(/key=([^\r\n]+)/i);
+            if (matchChild) {
+                API_KEY = matchChild[1].trim();
+                console.log("✅ API KEY cargada desde .env local");
+            } else {
+                console.error("❌ Archivo .env descargado, pero no se encontró 'key=...'! Contenido:", envTextChild);
+            }
+        } catch (err) {
+            console.error("❌ Fallo CRÍTICO leyendo el archivo .env vía Fetch. Mensaje HTTP:", err.message);
+            console.warn("⚠️ Pasando a Offline Fallback por falta de .env. Verifica que el servidor de Python exponga el .env y no haya permisos de sistema bloqueándolo.");
+        }
+    }
+
+    if (!API_KEY) {
+        console.warn("API_KEY está completamente vacía, abortando petición a Gemini.");
+        return getFallback();
+    }
+
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    
+    // Función de fallback genérica
+    const getFallback = (forceDefault = false) => {
+        if (forceDefault || !hobbies.length) {
+            const defaults = [
+                'salir a dar un paseo corto', 
+                'hacer una serie de estiramientos', 
+                'prepararte un té o café', 
+                'respirar profundamente 5 minutos',
+                'apagar la pantalla un instante',
+                'tomar un vaso de agua fresca',
+                'cerrar los ojos durante un par de minutos'
+            ];
+            return defaults[Math.floor(Math.random() * defaults.length)];
+        }
+        const templates = {
+            'caminar': 'dar un paseo corto de 15 minutos',
+            'correr': 'hacer una serie rápida de estiramientos o trote',
+            'musica': 'poner tu playlist favorita y cerrar los ojos',
+            'leer': 'desconectar leyendo unas páginas de tu libro',
+            'meditar': 'meditar 10 min respirando profundo',
+            'cocinar': 'prepararte algo rico o un snack saludable',
+            'guitarra': 'tocar un rato para desconectar la mente',
+            'dibujar': 'coger papel y dibujar libremente unos minutos',
+            'yoga': 'hacer una pausa corta de yoga o mindfulness',
+            'naturaleza': 'tomar aire fresco al lado de la ventana o calle',
+            'amigos': 'mandar un audio o llamar a quien tú sabes',
+            'gimnasio': 'levantarte y hacer movilidad articular',
+        };
+        const pick = hobbies[Math.floor(Math.random() * hobbies.length)];
+        return templates[pick] || `dedicar un momento a la afición seleccionada (${pick})`;
+    };
+
+    if (!useGemini) return getFallback(true);
+    if (!hobbies.length) return getFallback();
+
+    try {
+        const prompt = `El usuario tiene un alto nivel de estrés. Sus hobbies guardados son: ${hobbies.join(', ')}. Escribe una única frase corta (máximo 8 o 10 palabras), directa y amable, sugiriendo una actividad concreta y realista basada en estos hobbies para que se relaje ahora mismo. No des explicaciones ni uses comillas ni signos de puntuación finales, solo el predicado. Ejemplo: "escuchar un álbum completo de tu artista favorito" o "salir a andar por el parque".`;
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ HTTP Error ${response.status}: ${errorText}`);
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        let aiText = data.candidates[0].content.parts[0].text.trim().toLowerCase();
+        
+        // Limpiamos formato si la IA añade punto o comillas por error
+        aiText = aiText.replace(/^[.¡!¿?"']+|[.¡!¿?"']+$/g, '');
+        return aiText;
+        
+    } catch (error) {
+        console.warn("⚠️ Gemini API falló (posible límite de cuota o key agotada). Usando fallback offline:", error);
+        return getFallback();
+    }
+}
+
+// ─── Development & Demo Shortcuts ──────────────────────────
+// Press Shift + O to reset onboarding and reload the app
+document.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        localStorage.removeItem('gem_onboarded');
+        localStorage.removeItem('gem_hobbies');
+        location.reload();
+    }
+});
+

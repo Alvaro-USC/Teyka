@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Proyecto GEM — app.js
+   Proyecto Teyka — app.js
    IS Engine: IS = 0.60 × StressScore + 0.40 × BehaviorScore
    Session classification: Productive (green) vs Entertainment (red)
    Alert system: Trigger when IS > 75%

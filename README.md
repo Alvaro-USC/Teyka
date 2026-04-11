@@ -1,12 +1,12 @@
-# 📱 Proyecto GEM: Smart Wellbeing Co-Pilot
+# 📱 Proyecto Teyka: Smart Wellbeing Co-Pilot
 > **"Si tu smartwatch ya sabe cuándo debes despertarte, ¿por qué no permitirle que sepa cuándo debes soltar el móvil?"**
 
-**Proyecto GEM** es una solución tecnológica diseñada para combatir el uso compulsivo del smartphone mediante el análisis de datos biométricos en tiempo real. A diferencia de las aplicaciones restrictivas, GEM actúa como un "copiloto de bienestar" que detecta estados de fatiga y estrés para sugerir actividades alternativas personalizadas.
+**Proyecto Teyka** es una solución tecnológica diseñada para combatir el uso compulsivo del smartphone mediante el análisis de datos biométricos en tiempo real. A diferencia de las aplicaciones restrictivas, Teyka actúa como un "copiloto de bienestar" que detecta estados de fatiga y estrés para sugerir actividades alternativas personalizadas.
 
 ---
 
 ## 📑 Fundamentos Académicos
-La validez técnica de GEM se apoya en investigaciones recientes de detección pasiva y salud mental digital. El proyecto utiliza como base científica los hallazgos del ecosistema **StudentLife** y estudios longitudinales de 2021:
+La validez técnica de Teyka se apoya en investigaciones recientes de detección pasiva y salud mental digital. El proyecto utiliza como base científica los hallazgos del ecosistema **StudentLife** y estudios longitudinales de 2021:
 
 > **Cita Principal:** > Wang, W., et al. (2021). *"Social Sensing: Predicting Well-being from Heart Rate Variability and Smartphone Sensing Data in the Wild."* > Este estudio demuestra que la combinación de **HRV (Heart Rate Variability)** y los logs de uso del smartphone permite predecir niveles de estrés y bienestar con una precisión significativamente mayor que el uso de una sola fuente de datos. 
 
@@ -17,7 +17,7 @@ La validez técnica de GEM se apoya en investigaciones recientes de detección p
 ---
 
 ## 💡 Nuestra Solución: El Índice de Saturación (IS)
-GEM implementa un algoritmo que cruza estos hallazgos académicos con datos en tiempo real para intervenir de forma **proactiva**.
+Teyka implementa un algoritmo que cruza estos hallazgos académicos con datos en tiempo real para intervenir de forma **proactiva**.
 
 ### El Algoritmo
 El sistema calcula la probabilidad de uso compulsivo mediante la siguiente ponderación de variables:
@@ -57,4 +57,4 @@ El MVP se estructura mediante la integración y *backtesting* de los siguientes 
 * **Integración:** Propuesta de API para Gemini/Google Workspace para personalización de sugerencias.
 
 ---
-> **Proyecto GEM** — *Basado en evidencia científica para una vida digital equilibrada.*
+> **Proyecto Teyka** — *Basado en evidencia científica para una vida digital equilibrada.*
