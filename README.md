@@ -19,7 +19,8 @@ cd "gem - phone"
 python -m http.server 8097
 # Abrir en el navegador la app móvil: http://localhost:8097/mobile.html 
 ```
-[http://localhost:8096/admin.html](http://localhost:8097/mobile.html)
+[http://localhost:8097/mobile.html](http://localhost:8097/mobile.html)
+
 ---
 
 ## Arquitectura del Producto
