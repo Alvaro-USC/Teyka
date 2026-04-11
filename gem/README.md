@@ -18,9 +18,40 @@ El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina
 
 ---
 
-## 2. Datasets Utilizados
+## 2. Arquitectura del Producto
 
-### 2.1 Fitbit — Fitabase (Kaggle)
+El proyecto se divide en **tres productos** independientes:
+
+```
+Impacthon/
+├── gem/                   ← Dashboard de presentación + Panel Admin
+│   ├── index.html         ← Dashboard público (pitch Impacthon)
+│   ├── admin.html         ← Panel de investigación y data mining
+│   ├── extract_gem.py     ← ETL pipeline (IS diario + sesiones)
+│   └── gem_data.json      ← Datos procesados
+│
+├── gem - phone/           ← App Móvil de Salud (usuario final)
+│   ├── mobile.html        ← App iOS-style con IS intradía
+│   ├── mobile.css/js      ← Frontend móvil completo
+│   ├── extract_gem.py     ← ETL pipeline v4 (IS horario)
+│   └── gem_data.json      ← Datos con resolución horaria
+│
+└── dataset_final_pitch.csv   ← Fitbit RMSSD data
+```
+
+### Productos
+
+| Producto | Público | Descripción |
+|---|---|---|
+| **Dashboard Pitch** (`gem/index.html`) | Jurado / público | Dashboard visual para la presentación del Impacthon. Hero, IS Live, gráficos, simulador de nudge |
+| **Admin Panel** (`gem/admin.html`) | Investigadores | Panel con observabilidad, datos agregados, correlaciones, logs de alertas, banco de pruebas, exportación CSV/JSON |
+| **App Móvil** (`gem - phone/mobile.html`) | Usuario final | App de salud estilo iOS con gráfico intradía Trade Republic, notificaciones push, historial calendárico |
+
+---
+
+## 3. Datasets Utilizados
+
+### 3.1 Fitbit — Fitabase (Kaggle)
 
 - **Fuente:** [Fitbit Fitness Tracker Data](https://www.kaggle.com/arashnic/fitbit) via Fitabase
 - **Registros:** 2.4 millones de mediciones de frecuencia cardíaca segundo a segundo
@@ -31,7 +62,7 @@ El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina
   - **Perfil de Riesgo:** Clasificación derivada del RMSSD (Alto/Medio/Bajo).
 - **Uso en el sistema:** Establece la **baseline poblacional de RMSSD** (21.58 ms) y proporciona los datos de referencia para calibrar los umbrales de estrés fisiológico.
 
-### 2.2 GLOBEM — UW EXP Lab
+### 3.2 GLOBEM — UW EXP Lab
 
 - **Fuente:** [GLOBEM Dataset](https://github.com/UW-EXP/GLOBEM) — University of Washington
 - **Participantes:** 40 usuarios (4 cohortes, `INS-W-sample_1` a `INS-W-sample_4`)
@@ -87,14 +118,18 @@ Esto da valores realistas de 600-860 min de sedentarismo diurno, que es el compl
 
 ---
 
-## 3. Pipeline ETL (`extract_gem.py`)
+## 4. Pipeline ETL (`extract_gem.py`)
 
-### 3.1 Ingesta
+Existen **dos versiones** del ETL pipeline, una para cada producto:
+
+### 4.1 ETL v4 Hybrid — Dashboard + Admin (`gem/extract_gem.py`)
+
+Genera datos con resolución **diaria**. Usa sigmoide logística sobre CD para BehaviorScore + StressScore lineal.
 
 ```
-Fitbit (dataset_final_pitch.csv)
-    ├── RMSSD por usuario (baseline poblacional)
-    └── SedentaryMinutes (referencia Fitbit)
+Fitbit (dataset_final_pitch.csv / cache json)
+    ├── RMSSD por usuario (baseline poblacional: 21.58 ms)
+    └── Fallback: carga desde gem_data.json si CSV no disponible
 
 GLOBEM (4 cohortes × screen.csv + steps.csv)
     ├── Merge por (pid, date)
@@ -102,7 +137,61 @@ GLOBEM (4 cohortes × screen.csv + steps.csv)
     └── Filtrado: dropna en screen_min_allday y steps_allday
 ```
 
-### 3.2 Cálculo de Baselines por Usuario
+**Output:** `gem_data.json` con estructura:
+```json
+{
+  "engine": "Hybrid v4 (CD sigmoid + linear stress)",
+  "hyperparameters": { "alpha": 1.0, "beta": 3.0, "gamma_cd": 0.03, ... },
+  "fitbit_baseline_rmssd": 21.58,
+  "fitbit_users": [...],
+  "globem_users": [
+    {
+      "pid": "INS-W_617",
+      "avg_IS": 62.7,
+      "daily": [
+        {
+          "date": "2020-04-28",
+          "IS": 65.3,
+          "stress_score": 54.2,
+          "behavior_score": 78.5,
+          "CD": 523.1,
+          "B_base": 0.943,
+          "session_class": { "morning": "productive", ... }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 4.2 ETL v4 — App Móvil (`gem - phone/extract_gem.py`)
+
+Genera datos con resolución **horaria** (24 data points por día) para el gráfico intradía.
+
+**Output:** `gem_data.json` con estructura:
+```json
+{
+  "users": [
+    {
+      "id": "Usuario 1",
+      "days": [
+        {
+          "date": "2020-04-28",
+          "daily_is": 62.3,
+          "hourly": [
+            { "hour": 0, "is": 12.5, "screen": 2.1, "steps": 0, "rmssd": 28.3, "stress": 8.1, "behavior": 5.2 },
+            ...
+          ],
+          "rest_points": [9, 14, 20]
+        }
+      ],
+      "weekly": [...]
+    }
+  ]
+}
+```
+
+### 4.3 Cálculo de Baselines por Usuario
 
 ```python
 # Ratio de actividad: qué fracción de las 16h despierto es activa
@@ -114,15 +203,7 @@ synth_rmssd_baseline = 20 + activity_ratio * 20  # rango 20-34 ms
 
 **Justificación clínica:** El RMSSD mide tono vagal (activación parasimpática). La evidencia muestra que el sedentarismo crónico reduce el tono vagal basal — el nervio vago pierde capacidad de regulación. Esto se traduce en menor resiliencia al estrés agudo.
 
-**Ejemplo por usuario:**
-
-| Usuario | Active min/día | Activity Ratio | Baseline RMSSD |
-|---|---|---|---|
-| Sedentario (57 min activo) | 57 | 0.059 | 21.2 ms |
-| Moderado (194 min activo) | 194 | 0.202 | 24.0 ms |
-| Activo (350 min activo) | 350 | 0.365 | 27.3 ms |
-
-### 3.3 Selección de Usuarios Diversos
+### 4.4 Selección de Usuarios Diversos
 
 Se seleccionan **8 usuarios** representativos con perfiles extremos y medios:
 - 2 con **más pantalla** (>600 min/día)
@@ -133,19 +214,19 @@ Se seleccionan **8 usuarios** representativos con perfiles extremos y medios:
 
 ---
 
-## 4. Índice de Saturación (IS)
+## 5. Índice de Saturación (IS)
 
-### 4.1 Fórmula
+### 5.1 Fórmula
 
 ```
 IS = 0.55 × StressScore + 0.45 × BehaviorScore
 ```
 
 El IS combina dos dimensiones independientes:
-- **StressScore (55%):** Estado fisiológico del sistema nervioso autónomo
-- **BehaviorScore (45%):** Patrón de comportamiento digital
+- **StressScore (55%):** Estado fisiológico del sistema nervioso autónomo (lineal)
+- **BehaviorScore (45%):** Patrón de comportamiento digital (**sigmoide logística** sobre Carga Digital compuesta)
 
-### 4.2 StressScore — Componente Fisiológico
+### 5.2 StressScore — Componente Fisiológico (Lineal)
 
 El StressScore mide cuánto ha caído el RMSSD diario respecto a la baseline del usuario.
 
@@ -165,87 +246,95 @@ daily_rmssd = max(baseline - rmssd_drop, 8)  # Floor: 8 ms
 stress_score = ((baseline - daily_rmssd) / baseline) × 100
 ```
 
-**Desglose del mecanismo:**
-
 | Factor | Peso en la caída | Justificación |
 |---|---|---|
 | Pantalla | 60% | Estímulo principal de hiperfocalización y activación simpática |
 | Sedentarismo | 40% | Reduce activación parasimpática por inmovilidad prolongada |
 | Pasos (protección) | Hasta -40% | La actividad física favorece la regulación vagal |
 
-**Ejemplo numérico:**
+### 5.3 BehaviorScore — Componente Conductual (Sigmoide CD)
 
-```
-Usuario con baseline 24 ms:
-  - Pantalla: 400 min → screen_norm = 0.67
-  - Sedentarismo: 800 min → sed_norm = 0.89
-  - Pasos: 5000 → protection = 0.17
-  
-  rmssd_drop = (0.67×0.6 + 0.89×0.4) × 12 × (1 - 0.17)
-             = (0.40 + 0.36) × 12 × 0.83
-             = 0.76 × 9.96 = 7.5 ms
-  
-  daily_rmssd = 24 - 7.5 = 16.5 ms
-  stress_score = (24 - 16.5) / 24 × 100 = 31.3%
-```
+El BehaviorScore utiliza una **sigmoide logística** sobre la Carga Digital compuesta (CD), reemplazando la normalización lineal para capturar la relación dosis-respuesta real de toxicidad digital.
 
-### 4.3 BehaviorScore — Componente Conductual
-
-El BehaviorScore evalúa la calidad del uso digital combinando inercia de pantalla, clasificación de sesiones y penalización nocturna.
+#### 5.3.1 Carga Digital Compuesta (CD)
 
 ```python
-# 1. Inercia: ratio pantalla / (pantalla + actividad efectiva)
-eff_activity = active_min + steps / 150
-inertia = screen / max(screen + eff_activity, 1)  # 0 a 1
+CD = α × S_dur + β × U_freq - γ × P_acc
+```
 
-# 2. Clasificación de sesiones (ver sección 5)
-ent_count = nº segmentos clasificados como "entretenimiento"  # 0 a 4
+| Variable | Mapeo GLOBEM | Coeficiente | Justificación |
+|---|---|---|---|
+| S_dur | `sumdurationunlock` (min) | α = 1.0 | Duración total de pantalla |
+| U_freq | `countepisodeunlock` | β = 3.0 | Cada desbloqueo ≈ 3 min de carga cognitiva |
+| P_acc | `sumsteps` | γ = 0.03 | Compensación por actividad física |
 
-# 3. Penalización por entretenimiento: 15 pts por segmento
-ent_penalty = ent_count × 15  # 0 a 60
+#### 5.3.2 Sigmoide Logística
 
-# 4. Penalización nocturna: pantalla >30 min en horario 00:00-06:00
+```python
+B_base = 1 / (1 + e^(-k × (CD - θ)))
+```
+- **k = 0.012** — pendiente de la curva (velocidad de transición)
+- **θ = 280** — punto de inflexión (~4.5h pantalla con uso moderado)
+
+**Ejemplos de calibración:**
+| Perfil | S_dur | U_freq | Pasos | CD | B_base |
+|---|---|---|---|---|---|
+| Saludable | 100 min | 20 | 15,000 | -190 | 0.003 |
+| Moderado | 400 min | 80 | 8,000 | 400 | 0.81 |
+| Problemático | 600 min | 100 | 2,000 | 840 | 0.998 |
+
+#### 5.3.3 Score Final con Penalizaciones
+
+```python
+# Entertainment penalty (15 pts per segment)
+ent_penalty = ent_count × 15             # 0 a 60
+
+# Night penalty (pantalla nocturna >30 min)
 night_penalty = min(night_screen / 60, 1) × 10  # 0 a 10
 
-# 5. Score final
-behavior_score = min(inertia × 65 + ent_penalty + night_penalty, 100)
+# Score final
+behavior_score = min(B_base × 65 + ent_penalty + night_penalty, 100)
 ```
 
-**Rangos típicos:**
-
-| Perfil | Inertia | Ent Segments | BehaviorScore |
-|---|---|---|---|
-| Saludable (150 min pantalla, 20k pasos) | 0.10 | 0-1 | 7-22 |
-| Moderado (400 min pantalla, 8k pasos) | 0.42 | 1-2 | 42-57 |
-| Problemático (600 min pantalla, 2k pasos) | 0.82 | 2-4 | 83-100 |
-
-### 4.4 Garantías de Consistencia
-
-Para asegurar que la clasificación de sesiones siempre correlacione con el IS:
+### 5.4 Garantías de Consistencia
 
 ```python
-if ent_count >= 2: IS = max(IS, 50)    # 2+ segmentos ent → IS ≥ 50%
-if ent_count >= 3: IS = max(IS, 65)    # 3+ segmentos ent → IS ≥ 65%
-if ent_count >= 3 and screen > p75:    # 3+ ent + pantalla alta → IS ≥ 75%
-    IS = max(IS, 75)
-if ent_count == 4: IS = max(IS, 78)    # 4 segmentos ent → IS ≥ 78%
-if screen > 500 and steps < 3000:      # Pantalla extrema + inactividad → IS ≥ 75%
-    IS = max(IS, 75)
+if ent_count >= 2: IS = max(IS, 50)
+if ent_count >= 3: IS = max(IS, 65)
+if ent_count >= 3 and screen > p75: IS = max(IS, 75)
+if ent_count == 4: IS = max(IS, 78)
+if screen > 500 and steps < 3000: IS = max(IS, 75)
 ```
 
-### 4.5 Umbral de Alerta
+### 5.5 IS Horario (App Móvil)
+
+En la versión intradía (`gem - phone/extract_gem.py`), el IS se calcula **por hora** con mayor sensibilidad:
+
+```python
+# Umbrales horarios (más sensibles que diarios)
+screen_norm = min(h_screen / 25, 1)       # 25 min/hr saturates
+sed_norm = min(h_sedentary / 50, 1)       # 50 min/hr sedentary
+
+# Multiplicador más alto para resolución horaria
+rmssd_drop = (screen_norm * 0.6 + sed_norm * 0.4) * 14 * (1 - act_prot)
+h_rmssd = max(baseline - rmssd_drop, 6)   # Floor: 6 ms (más bajo)
+```
+
+**Rest points:** Se detectan horas donde el IS supera 50% siendo un pico local, o cualquier hora que cruce 75%.
+
+### 5.6 Umbral de Alerta
 
 Cuando **IS > 75%**, el sistema activa la intervención proactiva (Nudge).
 
 ---
 
-## 5. Clasificación de Sesiones: Productivo vs. Entretenimiento
+## 6. Clasificación de Sesiones: Productivo vs. Entretenimiento
 
-### 5.1 Principio
+### 6.1 Principio
 
 No tenemos datos de qué aplicación usa cada persona. La clasificación se basa en el **patrón de uso del móvil** cruzado con la **actividad física** en cada segmento del día. Es una **inferencia conductual**.
 
-### 5.2 Umbrales Personalizados (Per-User Percentiles)
+### 6.2 Umbrales Personalizados (Per-User Percentiles)
 
 Para cada usuario se calculan umbrales relativos a su propio historial:
 
@@ -256,9 +345,7 @@ screen_p75 = percentil 75
 steps_p25  = percentil 25 de pasos del usuario en ese segmento
 ```
 
-Esto evita el problema de comparar un usuario activo (22k pasos/día) con uno sedentario (2k pasos/día) usando umbrales absolutos.
-
-### 5.3 Reglas de Clasificación
+### 6.3 Reglas de Clasificación
 
 #### 🟢 Productivo
 Un segmento se clasifica como **productivo** cuando:
@@ -266,40 +353,26 @@ Un segmento se clasifica como **productivo** cuando:
 - **O** los pasos están **por encima del percentil 25** del usuario
 - **O** hay muchos desbloqueos con sesiones cortas (patrón de "check-and-go")
 
-**Interpretación:** Uso funcional del móvil — consultas rápidas, mensajes, mientras se mantiene actividad.
-
 #### 🔴 Entretenimiento
 Un segmento se clasifica como **entretenimiento** cuando se cumplen **dos condiciones simultáneas**:
 
 1. **Pantalla por encima de la mediana** del usuario para ese segmento
 2. **Y al menos una** señal de absorción pasiva:
    - **Pasos bajos** (< percentil 25) → sentado/tumbado
-   - **Patrón binge:** ≤5 desbloqueos con sesión media >15 min → pocas sesiones pero muy largas (scrolling infinito, streaming)
-   - **Sesión dominante:** una sesión >30 min que ocupa >60% del tiempo total del segmento → una sola actividad monopoliza el uso
-
-**Interpretación:** Absorción pasiva en el móvil con inmovilidad prolongada.
+   - **Patrón binge:** ≤5 desbloqueos con sesión media >15 min
+   - **Sesión dominante:** una sesión >30 min que ocupa >60% del tiempo total
 
 #### ⚪ None
 Si el tiempo de pantalla en ese segmento es <3 minutos → dato insuficiente.
 
-### 5.4 Señales Conductuales
-
-| Señal | Productivo | Entretenimiento |
-|---|---|---|
-| Duración de sesiones | Cortas, frecuentes | Largas, pocas |
-| Desbloqueos | Muchos (>5) | Pocos (≤5) |
-| Pasos durante uso | Normales/altos | Bajos |
-| Pantalla total | ≤ mediana del usuario | > mediana del usuario |
-| Sesión máxima | <30 min o <60% del total | >30 min y >60% del total |
-
 ---
 
-## 6. Rol del Sedentarismo en el Estrés
+## 7. Rol del Sedentarismo en el Estrés
 
 El sedentarismo impacta el estrés a través de **dos mecanismos**:
 
-### 6.1 Baseline RMSSD (Efecto Crónico)
-Un usuario con más sedentarismo medio tiene un RMSSD basal más bajo (peor tono vagal). Esto simula que una persona crónicamente sedentaria tiene un sistema nervioso autónomo de partida más débil.
+### 7.1 Baseline RMSSD (Efecto Crónico)
+Un usuario con más sedentarismo medio tiene un RMSSD basal más bajo (peor tono vagal).
 
 ```
 Mismo uso de pantalla (400 min):
@@ -307,25 +380,17 @@ Mismo uso de pantalla (400 min):
   - Usuario activo (baseline 27 ms): StressScore ≈ 28%
 ```
 
-El mismo estímulo digital genera +7 puntos más de estrés en el usuario sedentario.
-
-### 6.2 sed_norm Diario (Efecto Agudo)
-El sedentarismo del día (corregido: 960 - active_min) contribuye al 40% de la caída del RMSSD. Un día con 900 min de sedentarismo diurno provoca la caída máxima.
-
-### 6.3 Dónde se visualiza
-
-- **KPI "Sedentarismo":** Minutos de sedentarismo diurno corregido (600-900 min típico)
-- **KPI "RMSSD Synth.":** Valor diario del RMSSD sintético — usuarios sedentarios = valores base más bajos
-- **StressScore:** El valor numérico refleja la amplificación del estrés por sedentarismo
+### 7.2 sed_norm Diario (Efecto Agudo)
+El sedentarismo del día (corregido: 960 - active_min) contribuye al 40% de la caída del RMSSD.
 
 ---
 
-## 7. Sistema de Nudge
+## 8. Sistema de Nudge
 
-### 7.1 Trigger
+### 8.1 Trigger
 Cuando IS > 75%, el sistema activa la intervención proactiva.
 
-### 7.2 Flujo del Nudge
+### 8.2 Flujo
 
 ```
 1. 📡 Monitoreo Pasivo
@@ -335,87 +400,312 @@ Cuando IS > 75%, el sistema activa la intervención proactiva.
    → StressScore + BehaviorScore → IS > 75% → Trigger
 
 3. 🔔 Nudge Contextual
-   → Sugerencia de actividad alternativa adaptada al perfil
+   → Notificación estilo iOS con sugerencia de descanso
 
 4. 🔄 Aprendizaje Continuo
    → Feedback del usuario ajusta pesos para futuras intervenciones
 ```
 
-### 7.3 Ejemplos de Sugerencias
+### 8.3 Implementación en App Móvil
 
-Las sugerencias se basan en los datos biométricos del momento:
-
-- "Llevas **5h 23min** de pantalla. Sal a **caminar 15 min** — tu HRV mejorará un 20%."
-- "Tu sistema nervioso necesita un **descanso**. Prueba **10 min de respiración** guiada."
-- "Tu RMSSD ha caído un **30%**. Deja el móvil y **sal a pasear**."
+La app móvil (`gem - phone/mobile.html`) implementa **notificaciones estilo iOS** que:
+- Aparecen como pop-up superior con animación slide-down
+- Muestran datos reales: minutos de pantalla, hora del pico IS, sugerencia concreta
+- Ofrecen dos acciones: "Descansar ahora" / "En 15 min"
+- Incluyen vibración tactile (si el dispositivo lo soporta)
 
 ---
 
-## 8. Dashboard Técnico
+## 9. Productos y Funcionalidades
 
-### 8.1 Stack
+### 9.1 Dashboard Pitch (`gem/index.html`)
+
+Dashboard visual para la presentación del Impacthon. Estética dark Grafana-style.
+
+| Sección | Contenido |
+|---|---|
+| **Hero** | Estadísticas globales del dataset |
+| **IS Live** | Gauge circular + StressScore + BehaviorScore + clasificación de sesiones |
+| **Visualización Dual** | Series temporales IS/RMSSD/Pantalla/Pasos + barras intradía |
+| **Sistema de Nudge** | Simulador de notificación en smartwatch |
+| **Pipeline** | Diagrama visual de la arquitectura |
+
+### 9.2 Panel de Administración (`gem/admin.html`)
+
+Panel de investigación para data mining y observabilidad. Dark theme profesional con sidebar.
+
+| Vista | Funcionalidades |
+|---|---|
+| **Overview** | 6 KPIs globales, histograma IS, comparativa por usuario (barras horizontales), donut Entretenimiento vs Productivo, RMSSD baseline vs diario, Fitbit RMSSD poblacional |
+| **Usuarios** | Tabla ordenable y filtrable por PID, IS, pantalla, pasos, sedentarismo. Click en fila → panel de detalle con gráfico IS diario, descomposición Stress vs Behavior, timeline de segmentos entertainment/productive |
+| **Correlaciones** | 4 scatter plots: Pantalla↔IS, Pasos↔Stress, RMSSD↔IS, Sedentarismo↔Behavior. Matriz de correlación 5×5 con heatmap |
+| **Logs & Alertas** | Tabla de todos los días/usuarios con IS, scores, pannalla, pasos, segmentos. Filtrable por nivel (Crítico/Alerta/Todos). 350+ registros con badges de nivel |
+| **Banco de Pruebas** | Simulador de pesos W₁/W₂ con sliders. Recalcula IS en tiempo real y muestra histograma dual (original vs simulado), delta IS, días críticos simulados |
+| **Exportar** | Descarga CSV y JSON de todos los datos procesados |
+
+### 9.3 App Móvil (`gem - phone/mobile.html`)
+
+App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil con frame de teléfono en desktop.
+
+| Componente | Descripción |
+|---|---|
+| **Cabecera** | Saludo personalizado (ej. "Hola, Álvaro" dependiente de la hora), fecha y mini-selector de usuario discretamente integrado. |
+| **Gauge IS circular** | Anillo SVG animado y texturizado para alto contraste, con color dinámico por nivel. |
+| **Gráfico intradía** | Línea estilo Trade Republic sin puntos (limpia), con un umbral de alerta punteado (70%). |
+| **Rest Points** | Se visualizan como **franjas verticales rojas** translúcidas directamente sobre el gráfico, indicando las horas de uso tóxico sugeridas para el descanso. |
+| **Selector de rango** | Hoy (24h) / Semana (7 días) / Mes (todos los días). |
+| **Health cards** | RMSSD, Pasos, Pantalla y Actividad con barras de progreso métricas e **iconos vectoriales SVG** de alta fidelidad. |
+| **Descomposición IS** | StressScore y BehaviorScore con los pesos del motor (0.55 / 0.45). |
+| **Historial** | Calendario coloreado por IS, chart histórico de área, y panel inferior de estadísticas (media, máximo, tendencia). |
+| **Notificaciones** | Pop-up nativo iOS-style con datos reales y call-to-actions. |
+
+---
+
+## 10. Stack Técnico
 
 | Componente | Tecnología |
 |---|---|
-| ETL / Pipeline | Python (Pandas, NumPy) |
-| Frontend | HTML5, CSS3 (Glassmorphism sobrio), JS Nativo |
-| Charts | Chart.js 4.4.4 |
-| Tipografía | Inter + JetBrains Mono (Google Fonts) |
+| ETL / Pipeline | Python 3.x (Pandas, NumPy) |
+| Frontend | HTML5, CSS3 (variables CSS, glassmorphism), JavaScript ES6+ nativo |
+| Charts | [Chart.js 4.4.4](https://www.chartjs.org/) (CDN) |
+| Tipografía | [Inter](https://fonts.google.com/specimen/Inter) + [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) (Google Fonts CDN) |
+| Gauge IS | SVG nativo (stroke-dasharray/dashoffset animation) |
+| Servidor | `python -m http.server` (desarrollo local) |
 | Datos | `gem_data.json` (generado por `extract_gem.py`) |
 
-### 8.2 Secciones del Dashboard
+---
 
-1. **Hero** — Estadísticas globales del dataset
-2. **IS Live** — Gauge circular + StressScore + BehaviorScore + clasificación de sesiones + KPIs + timeline con simulación temporal
-3. **Visualización Dual** — Gráficas Chart.js: serie temporal IS/RMSSD/Pantalla/Pasos + barras intradía por segmento
-4. **Sistema de Nudge** — Simulador de notificación en smartwatch con vibración
-5. **Pipeline** — Diagrama visual de la arquitectura de datos
+## 11. Estructura Completa de Archivos
 
-### 8.3 Simulación Temporal
-
-El dashboard incluye un reproductor temporal que avanza día a día por el historial de cada usuario:
-- **Velocidades:** 7s (lenta) / 3.5s (media) / 1.5s (rápida) por transición
-- Al avanzar, se actualizan en tiempo real: gauge IS, scores, clasificación de sesiones, KPIs, y highlight en la gráfica temporal
-- Cuando IS > 75%, aparece un banner de alerta rojo con sugerencia
+```
+Impacthon/
+│
+├── gem/                           # Dashboard + Admin Panel
+│   ├── extract_gem.py             # ETL v3: IS diario + sesiones → gem_data.json
+│   ├── gem_data.json              # Datos procesados (8 usuarios × ~40 días, resolución diaria)
+│   ├── index.html                 # Dashboard público (pitch Impacthon)
+│   ├── styles.css                 # CSS: dark theme, glassmorphism
+│   ├── app.js                     # IS Engine + Charts + Nudge simulator
+│   ├── admin.html                 # Panel de investigación (sidebar layout)
+│   ├── admin.css                  # CSS: dark research dashboard
+│   ├── admin.js                   # Charts, tablas, correlaciones, sandbox, exports
+│   └── README.md                  # Esta documentación
+│
+├── gem - phone/                   # App Móvil (usuario final)
+│   ├── extract_gem.py             # ETL v4: IS horario intradía → gem_data.json
+│   ├── gem_data.json              # Datos procesados (resolución horaria, 24 pts/día)
+│   ├── mobile.html                # App SPA (swipeable screens)
+│   ├── mobile.css                 # CSS: white/red iOS aesthetic
+│   ├── mobile.js                  # Charts Trade Republic + notificaciones
+│   ├── index.html                 # Dashboard público (copia)
+│   ├── styles.css                 # CSS del dashboard (copia)
+│   └── app.js                     # Dashboard logic (copia)
+│
+├── dataset_final_pitch.csv        # Fitbit RMSSD data (14 usuarios)
+├── globem_temp/                   # GLOBEM raw data (4 cohortes)
+│   └── GLOBEM-main/data_raw/
+│       ├── INS-W-sample_1/FeatureData/{screen,steps}.csv
+│       ├── INS-W-sample_2/...
+│       ├── INS-W-sample_3/...
+│       └── INS-W-sample_4/...
+│
+├── README.md                      # README raíz
+├── WHITE_PAPER.md                 # White paper completo
+├── SUMMARY.md                     # Resumen del sistema
+├── biometric_inference_fuzzy.md   # Documentación de inferencia difusa
+├── dataset_analysis.py            # Análisis exploratorio del dataset
+├── globem_analysis.py             # Análisis GLOBEM
+└── visualize_metrics.py           # Visualizaciones de métricas
+```
 
 ---
 
-## 9. Estructura de Archivos
+## 12. Bootstrapping y Deployment
+
+### 12.1 Requisitos Previos
+
+```bash
+# Python 3.8+
+python --version   # debe ser >= 3.8
+
+# Instalar dependencias
+pip install pandas numpy
+```
+
+### 12.2 Preparar los Datos
+
+Los datasets deben estar en las rutas relativas correctas antes de ejecutar el ETL:
 
 ```
-gem/
-├── extract_gem.py      # Pipeline ETL: Fitbit + GLOBEM → gem_data.json
-├── gem_data.json       # Datos procesados (8 usuarios × ~40 días)
-├── index.html          # Dashboard SPA
-├── styles.css          # CSS: dark theme, glassmorphism sobrio
-├── app.js              # IS Engine + Charts + Nudge simulator
-└── README.md           # Esta documentación
+Impacthon/
+├── dataset_final_pitch.csv                      ← Fitbit (Kaggle)
+├── globem_temp/GLOBEM-main/data_raw/
+│   ├── INS-W-sample_1/FeatureData/screen.csv   ← GLOBEM sample 1
+│   ├── INS-W-sample_1/FeatureData/steps.csv
+│   ├── INS-W-sample_2/FeatureData/screen.csv   ← GLOBEM sample 2
+│   ├── INS-W-sample_2/FeatureData/steps.csv
+│   ├── INS-W-sample_3/FeatureData/...          ← GLOBEM sample 3
+│   └── INS-W-sample_4/FeatureData/...          ← GLOBEM sample 4
 ```
 
----
+**Descargar Fitbit data:**
+1. Descargar desde [Kaggle Fitbit Dataset](https://www.kaggle.com/arashnic/fitbit)
+2. Procesar con `dataset_analysis.py` para generar `dataset_final_pitch.csv`
 
-## 10. Cómo Ejecutar
+**Descargar GLOBEM data:**
+1. Clonar [GLOBEM repo](https://github.com/UW-EXP/GLOBEM) en `globem_temp/`
+2. Los archivos screen.csv y steps.csv ya vienen en el repositorio
 
-### Generar datos
+### 12.3 Generar datos para Dashboard + Admin (`gem/`)
+
 ```bash
 cd gem
 python extract_gem.py
 ```
 
-Requiere:
-- `../dataset_final_pitch.csv` (Fitbit procesado)
-- `../globem_temp/GLOBEM-main/data_raw/INS-W-sample_*/FeatureData/` (GLOBEM raw)
+**Output esperado:**
+```
+Loading Fitbit data...
+  Fitbit users: 14, rows: 14
+  Population RMSSD baseline: 21.58 ms
 
-### Lanzar dashboard
+Loading GLOBEM data...
+  Sample 1: screen=1234, steps=1234
+  ...
+
+Merged GLOBEM: 350 rows, 40 participants
+
+Computing IS per day...
+Selecting diverse profiles...
+  INS-W_617: screen=454min, steps=1668, avg_IS=62.0%
+  ...
+
+=== gem_data.json SAVED ===
+Fitbit users: 14, GLOBEM users: 8
+```
+
+Esto genera `gem/gem_data.json` (~718KB) con datos de resolución diaria.
+
+### 12.4 Generar datos para App Móvil (`gem - phone/`)
+
+```bash
+cd "gem - phone"
+python extract_gem.py
+```
+
+Esto genera `gem - phone/gem_data.json` (~2.1MB) con datos de resolución horaria.
+
+### 12.5 Lanzar en Local (Desarrollo)
+
+Para visualizar ambos entornos simultáneamente usando los servidores HTTP de Python:
+
+**Terminal 1 — Dashboard y Admin (Puerto 8096):**
 ```bash
 cd gem
-python -m http.server 8080
-# Abrir http://localhost:8080
+python -m http.server 8096
+
+# Dashboard Web: http://localhost:8096
+# Admin Panel:   http://localhost:8096/admin.html
 ```
+
+**Terminal 2 — App Móvil (Puerto 8097):**
+```bash
+cd "gem - phone"
+python -m http.server 8097
+
+# App Móvil UI: http://localhost:8097/mobile.html
+```
+
+> **Tip Mobile:** En Chrome/Edge DevTools (F12), usa el *Device Toolbar Toggle* (`Ctrl+Shift+M`) y selecciona un dispositivo como "iPhone 14 Pro" para manipular la app móvil en su factor de forma nativo y activar los eventos Touch.
+
+### 12.6 Deployment en Producción (Todas las webs)
+
+Al ser aplicaciones 100% estáticas (Vanilla JS/HTML/CSS sin Backend), servidas sobre el JSON estático pre-computado (`gem_data.json`), su despliegue es trivial, increíblemente rápido y altamente escalable.
+
+Se recomienda la siguiente topología de accesos:
+- `gem.tudominio.com` → Pitch Dashboard (Público)
+- `gem.tudominio.com/admin.html` → Admin Panel (Investigadores)
+- `app.gem.com` *(o gem.tudominio.com/app)* → App Móvil (Usuario final)
+
+#### Opción A — Servidor Nginx (Recomendado para VPS propios)
+
+Ejemplo de bloque `server` para configurar ambos productos en el mismo host pero con directorios segregados:
+
+```nginx
+server {
+    listen 80;
+    server_name gem.tudominio.com;
+
+    # Producto 1: Dashboard y Admin (Root path)
+    location / {
+        alias /var/www/gem/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Producto 2: App Móvil (Sub-path)
+    location /app/ {
+        alias /var/www/gem-phone/;
+        index mobile.html;
+        try_files $uri $uri/ =404;
+    }
+}
+```
+*Pasos:* 
+1. Subir contenidos de `gem/` a `/var/www/gem/`
+2. Subir contenidos de `gem - phone/` a `/var/www/gem-phone/`
+3. Asegurar que cada carpeta incluye su respectivo `gem_data.json`.
+
+#### Opción B — Vercel / Netlify / Cloudflare Pages (Serverless)
+
+La forma más rápida. Se deben crear **dos proyectos separados** en tu cuenta (ej. en Vercel):
+
+**Proyecto 1 (Web Principal):**
+- Conectar Repositorio GitHub.
+- **Root Directory:** `gem/`
+- **Build Command:** *(dejar vacío)*
+- **Output Directory:** `.` o `gem/`
+
+**Proyecto 2 (La App):**
+- Conectar Repositorio GitHub.
+- **Root Directory:** `gem - phone/`
+- **Build Command:** *(dejar vacío)*
+- Opcionalmente añade un *Redirect* en la configuración del proveedor para que la raíz `/` envíe automáticamente a `/mobile.html`.
+
+#### Opción C — Embalaje Docker 
+
+Si requieres llevar todo a contenedores (Kubernetes/ECS), un `Dockerfile` unificado usando Nginx Alpine:
+
+```dockerfile
+FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copia de Dashboard
+COPY ./gem /usr/share/nginx/html/
+# Copia de Mobile app en subcarpeta app/
+COPY ./gem\ -\ phone /usr/share/nginx/html/app/
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+> ⚠️ **Advertencia de Datos Crítica:** Recuerda siempre ejecutar `python extract_gem.py` en ambas plataformas después de cualquier cambio en el motor o en los datasets base, antes de desplegar. El motor se ejecuta pre-runtime, no durante. Si `gem_data.json` no se sube compilado, las webs fallarán sin mostrar métricas.
 
 ---
 
-## 11. Decisiones de Diseño
+## 13. Decisiones de Diseño
+
+### ¿Por qué sigmoide logística para el BehaviorScore?
+La normalización lineal (`screen / 600`) satura abruptamente y no captura la relación dosis-respuesta real. La sigmoide logística sobre la Carga Digital compuesta (CD):
+- Modela correctamente la curva de toxicidad digital (poco impacto al inicio, aceleración, saturación)
+- Es diferenciable en todo el dominio (útil para futuro aprendizaje automático)
+- Integra pantalla, desbloqueos y pasos en una sola métrica compuesta
+- El punto de inflexión θ=280 CD units corresponde a ~4.5h de pantalla con uso moderado
+
+### ¿Por qué pesos 0.55/0.45?
+Inicialmente se usó 0.60/0.40, pero tras calibración:
+- Con 0.60/0.40, el StressScore dominaba y causaba saturación (100% constante) en usuarios sedentarios
+- Con 0.55/0.45, el BehaviorScore (que incluye la sigmoide CD + clasificación de sesiones) tiene influencia suficiente para que el IS responda a los patrones de uso real
 
 ### ¿Por qué RMSSD sintético?
 Los datasets Fitbit y GLOBEM son de usuarios **diferentes**. No podemos vincular directamente el RMSSD real de un usuario Fitbit con la conducta de un usuario GLOBEM. Por ello, generamos un RMSSD sintético per-usuario GLOBEM que:
@@ -423,14 +713,19 @@ Los datasets Fitbit y GLOBEM son de usuarios **diferentes**. No podemos vincular
 - **Varía diariamente** en función de la conducta digital y la actividad física
 - Mantiene la **correlación clínica** validada: más pantalla + menos pasos → RMSSD baja → estrés sube
 
-### ¿Por qué pesos 0.55/0.45?
-Inicialmente se usó 0.60/0.40, pero tras calibración:
-- Con 0.60/0.40, el StressScore dominaba y causaba saturación (100% constante) en usuarios sedentarios
-- Con 0.55/0.45, el BehaviorScore (que incluye la clasificación de sesiones) tiene más influencia, haciendo que el IS responda mejor a los patrones de uso real
-
 ### ¿Por qué clasificación relativa per-usuario?
 La v1 usaba umbrales absolutos (`avg_session > 10 min && steps < 500`). Esto causaba que:
 - Usuarios activos (22k pasos) **nunca** se clasificaran como entretenimiento
 - Usuarios sedentarios **siempre** fueran entretenimiento
 
 La v2 usa percentiles del propio usuario, de modo que cada persona se compara **consigo misma**: un usuario activo puede tener entretenimiento cuando está inusualmente quieto con pantalla alta.
+
+### ¿Por qué dos versiones del ETL?
+- El **dashboard de presentación** necesita datos diarios con clasificación de sesiones para las gráficas de la demo
+- La **app móvil** necesita datos horarios para el gráfico intradía estilo Trade Republic, que requiere mayor granularidad temporal
+
+### ¿Por qué paleta blanco/rojo para la app móvil?
+Se eligió una paleta minimalista blanco/rojo inspirada en Apple Health y Trade Republic porque:
+- El rojo señala **urgencia** sin ser agresivo
+- El blanco mantiene la **claridad** y legibilidad
+- Los niveles de saturación se comunican intuitivamente: más rojo = más saturación

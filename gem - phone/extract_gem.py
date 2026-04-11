@@ -7,6 +7,7 @@ Output: gem_data.json with hourly resolution per user/day.
 import pandas as pd
 import numpy as np
 import json
+import math
 
 # ═══════════════════════════════════════════════════════════════
 # 1. LOAD FITBIT DATA
@@ -178,11 +179,21 @@ def compute_hourly(row, baseline):
         h_rmssd = max(baseline - rmssd_drop, 6)
         stress = min(((baseline - h_rmssd) / max(baseline, 1)) * 100, 100)
         
-        # Behavior: screen ratio + volume penalty
-        eff_act = h_active + h_steps / 100
-        inertia = h_screen / max(h_screen + eff_act, 1)
+        # Behavior: CD sigmoid (hourly scale)
+        # Hourly coefficients scaled down from daily (1 hour vs full day)
+        h_unlocks = seg_screen / max(seg_steps / 200 + 1, 1) * w  # proxy: screen intensity
+        h_cd = 1.0 * h_screen + 3.0 * h_unlocks - 0.03 * h_steps
+        # Sigmoid with hourly inflection: ~15 CD units per hour
+
+        h_cd_x = 0.08 * (h_cd - 15)
+        if h_cd_x >= 0:
+            b_base = 1.0 / (1.0 + math.exp(-h_cd_x))
+        else:
+            ex = math.exp(h_cd_x)
+            b_base = ex / (1.0 + ex)
+        
         screen_bonus = 20 if h_screen > 20 else (10 if h_screen > 10 else 0)
-        behavior = min(inertia * 60 + screen_bonus, 100)
+        behavior = min(b_base * 65 + screen_bonus, 100)
         
         is_val = 0.55 * stress + 0.45 * behavior
         

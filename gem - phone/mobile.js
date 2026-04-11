@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    GEM Mobile — App Logic
    Trade Republic chart + Swipe + iOS Notifications
+   Rest periods: vertical red bands instead of dots
    ═══════════════════════════════════════════════════════════════ */
 
 // ─── State ──────────────────────────────────────────────────
@@ -27,6 +28,16 @@ function isColor(val) {
     return '#C62828';
 }
 
+// ─── SVG Icons ──────────────────────────────────────────────
+const SVG = {
+    alertCircle: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    checkCircle: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    chart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>`,
+    alertTriangle: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    bell: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+    calendar: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+};
+
 // ─── Init ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     updateClock();
@@ -52,21 +63,28 @@ function updateClock() {
     const h = now.getHours().toString().padStart(2, '0');
     const m = now.getMinutes().toString().padStart(2, '0');
     document.getElementById('status-time').textContent = `${h}:${m}`;
+}
 
-    const hour = now.getHours();
-    const el = document.getElementById('today-greeting');
-    if (el) {
-        if (hour < 12) el.textContent = 'Buenos días';
-        else if (hour < 20) el.textContent = 'Buenas tardes';
-        else el.textContent = 'Buenas noches';
-    }
+function updateGreeting(userName) {
+    const hour = new Date().getHours();
+    let greeting;
+    if (hour < 12) greeting = 'Buenos días';
+    else if (hour < 20) greeting = 'Buenas tardes';
+    else greeting = 'Buenas noches';
+
+    // Extract a name: "Usuario 1" → "Álvaro" (use fixed name for demo)
+    const names = ['Álvaro', 'María', 'Carlos', 'Lucía', 'Diego', 'Ana', 'Pablo', 'Sofía'];
+    const idx = state.userIdx % names.length;
+    const name = names[idx];
+    
+    document.getElementById('greeting-name').textContent = `Hola, ${name}`;
+    document.getElementById('greeting-sub').textContent = `${greeting} · Tu resumen de hoy`;
 }
 
 // ─── User Selection ─────────────────────────────────────────
 function initUserModal() {
     const trigger = document.getElementById('user-trigger');
     const modal = document.getElementById('user-modal');
-    const list = document.getElementById('user-list');
 
     trigger.addEventListener('click', () => {
         buildUserList();
@@ -83,12 +101,13 @@ function buildUserList() {
     DATA.users.forEach((u, i) => {
         const level = getLevel(u.summary.avg_is);
         const avatarColors = ['#E53935','#F4511E','#7B1FA2','#1976D2','#00897B','#43A047','#FF8F00','#5E35B1'];
+        const names = ['Álvaro', 'María', 'Carlos', 'Lucía', 'Diego', 'Ana', 'Pablo', 'Sofía'];
         const item = document.createElement('div');
         item.className = `user-item ${i === state.userIdx ? 'user-selected' : ''}`;
         item.innerHTML = `
-            <div class="user-avatar" style="background:${avatarColors[i % 8]}">${i + 1}</div>
+            <div class="user-avatar" style="background:${avatarColors[i % 8]}">${names[i][0]}</div>
             <div class="user-info">
-                <div class="user-name">${u.id}</div>
+                <div class="user-name">${names[i]}</div>
                 <div class="user-detail">${u.summary.avg_screen}min pantalla · ${u.summary.avg_steps} pasos</div>
             </div>
             <div class="user-is" style="background:${level.color}20;color:${level.color}">${u.summary.avg_is}%</div>
@@ -104,9 +123,9 @@ function buildUserList() {
 function selectUser(idx) {
     state.userIdx = idx;
     const user = DATA.users[idx];
-    state.dayIdx = user.days.length - 1; // Start at last day (most recent)
+    state.dayIdx = user.days.length - 1;
     state.notifShown = false;
-    document.getElementById('today-user').textContent = user.id;
+    updateGreeting(user.id);
     renderDay();
     renderHistory();
 }
@@ -122,7 +141,7 @@ function renderDay() {
     document.getElementById('is-number').textContent = Math.round(avgIS);
     document.getElementById('is-level').textContent = level.name;
 
-    // Animate SVG arc: circumference = 2π×52 ≈ 327
+    // Animate SVG arc
     const arc = document.getElementById('is-arc');
     const circumference = 327;
     const offset = circumference - (circumference * Math.min(avgIS, 100) / 100);
@@ -177,7 +196,7 @@ function renderRestPoints(day) {
     const container = document.getElementById('rest-points');
     container.innerHTML = '';
     if (!day.rest_points || day.rest_points.length === 0) {
-        container.innerHTML = '<div class="rest-point rest-low">Sin alertas hoy ✓</div>';
+        container.innerHTML = `<div class="rest-point rest-low">${SVG.checkCircle} Sin alertas hoy</div>`;
         return;
     }
     day.rest_points.forEach(h => {
@@ -185,12 +204,12 @@ function renderRestPoints(day) {
         const cls = isVal > 70 ? 'rest-high' : isVal > 50 ? 'rest-mid' : 'rest-low';
         const pip = document.createElement('div');
         pip.className = `rest-point ${cls}`;
-        pip.innerHTML = `🔴 ${h}:00`;
+        pip.innerHTML = `${SVG.alertCircle} ${h}:00`;
         container.appendChild(pip);
     });
 }
 
-// ─── Trade Republic Chart ───────────────────────────────────
+// ─── Trade Republic Chart — RED BANDS for rest zones ────────
 function renderDayChart(day) {
     const ctx = document.getElementById('main-chart').getContext('2d');
     if (mainChart) mainChart.destroy();
@@ -199,7 +218,6 @@ function renderDayChart(day) {
     const values = day.hourly.map(h => h.is);
     const restSet = new Set(day.rest_points || []);
 
-    // Create gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, 220);
     const maxVal = Math.max(...values);
     if (maxVal > 70) {
@@ -215,16 +233,88 @@ function renderDayChart(day) {
         gradient.addColorStop(1, 'rgba(199, 199, 204, 0)');
     }
 
-    // Point colors: red for rest points, transparent for others
-    const pointBg = day.hourly.map(h =>
-        restSet.has(h.hour) ? '#E53935' : 'transparent'
-    );
-    const pointRadius = day.hourly.map(h =>
-        restSet.has(h.hour) ? 5 : 0
-    );
-    const pointBorder = day.hourly.map(h =>
-        restSet.has(h.hour) ? '#FFF' : 'transparent'
-    );
+    const restBandsPlugin = {
+        id: 'restBands',
+        beforeDatasetsDraw(chart) {
+            const { ctx, chartArea, scales: { x, y } } = chart;
+            if (!chartArea || !x || !y) return;
+            
+            const meta = chart.getDatasetMeta(0);
+            if (!meta || !meta.data || !meta.data.length || restSet.size === 0) return;
+            
+            ctx.save();
+            const points = meta.data;
+
+            const periods = [];
+            const sorted = Array.from(restSet).sort((a,b)=>a-b);
+            sorted.forEach(hour => {
+                const i = day.hourly.findIndex(h => h.hour === hour);
+                if (i === -1) return;
+                periods.push({ start: Math.max(0, i - 1), end: Math.min(points.length - 1, i + 1) });
+            });
+
+            const merged = [];
+            periods.forEach(p => {
+                if (!merged.length) merged.push({...p});
+                else {
+                    const last = merged[merged.length - 1];
+                    if (p.start <= last.end) last.end = Math.max(last.end, p.end);
+                    else merged.push({...p});
+                }
+            });
+
+            merged.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(points[p.start].x, chartArea.bottom);
+                ctx.lineTo(points[p.start].x, points[p.start].y);
+
+                for (let i = p.start + 1; i <= p.end; i++) {
+                    const pt = points[i];
+                    if (pt && pt.cp1x !== undefined && pt.cp1y !== undefined && pt.cp2x !== undefined && pt.cp2y !== undefined) {
+                        ctx.bezierCurveTo(pt.cp1x, pt.cp1y, pt.cp2x, pt.cp2y, pt.x, pt.y);
+                    } else if (pt) {
+                        ctx.lineTo(pt.x, pt.y);
+                    }
+                }
+                
+                ctx.lineTo(points[p.end].x, chartArea.bottom);
+                ctx.closePath();
+
+                ctx.fillStyle = 'rgba(229, 57, 53, 0.25)'; // Relleno semitransparente sin contorno perimetral
+                ctx.fill();
+
+                // Sello de colisión superior: Difumina el anti-aliasing contra la curva maestra 
+                // para que abrace perfectamente la línea roja de Chart.js
+                ctx.beginPath();
+                ctx.moveTo(points[p.start].x, points[p.start].y);
+                for (let i = p.start + 1; i <= p.end; i++) {
+                    const pt = points[i];
+                    if (pt && pt.cp1x !== undefined && pt.cp1y !== undefined) {
+                        ctx.bezierCurveTo(pt.cp1x, pt.cp1y, pt.cp2x, pt.cp2y, pt.x, pt.y);
+                    } else if (pt) {
+                        ctx.lineTo(pt.x, pt.y);
+                    }
+                }
+                ctx.strokeStyle = 'rgba(229, 57, 53, 0.25)'; // Mismo color rojo translúcido
+                ctx.lineWidth = 2.5; // Grosor exacto de sellado
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+            });
+
+            const yPos = y.getPixelForValue(70);
+            if (yPos >= chartArea.top && yPos <= chartArea.bottom) {
+                ctx.strokeStyle = 'rgba(229, 57, 53, 0.35)';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, yPos);
+                ctx.lineTo(chartArea.right, yPos);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+    };
 
     mainChart = new Chart(ctx, {
         type: 'line',
@@ -237,11 +327,9 @@ function renderDayChart(day) {
                 backgroundColor: gradient,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: pointBg,
-                pointBorderColor: pointBorder,
-                pointBorderWidth: 2,
-                pointRadius: pointRadius,
-                pointHoverRadius: 6,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: isColor(maxVal),
             }]
         },
         options: {
@@ -256,9 +344,10 @@ function renderDayChart(day) {
                 x: {
                     grid: { display: false },
                     ticks: {
-                        font: { size: 10 },
+                        font: { size: 10, family: 'Inter' },
                         maxTicksLimit: 8,
                         callback: (v, i) => i % 3 === 0 ? labels[i] : '',
+                        color: '#AEAEB2',
                     },
                     border: { display: false },
                 },
@@ -277,7 +366,6 @@ function renderDayChart(day) {
                     tooltip.querySelector('#tooltip-hour').textContent = `${h.hour}:00`;
                     tooltip.querySelector('#tooltip-is').textContent = `${Math.round(h.is)}%`;
                     tooltip.classList.add('visible');
-                    const rect = e.chart.canvas.getBoundingClientRect();
                     const x = elements[0].element.x;
                     const y = elements[0].element.y;
                     tooltip.style.left = `${x - 30}px`;
@@ -286,28 +374,9 @@ function renderDayChart(day) {
                     tooltip.classList.remove('visible');
                 }
             }
-        }
+        },
+        plugins: [restBandsPlugin]
     });
-
-    // Threshold line annotation
-    const plugin = {
-        id: 'thresholdLine',
-        afterDraw(chart) {
-            const { ctx, scales: { y } } = chart;
-            const yPos = y.getPixelForValue(70);
-            ctx.save();
-            ctx.strokeStyle = 'rgba(229, 57, 53, 0.3)';
-            ctx.setLineDash([6, 4]);
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(chart.chartArea.left, yPos);
-            ctx.lineTo(chart.chartArea.right, yPos);
-            ctx.stroke();
-            ctx.restore();
-        }
-    };
-    mainChart.config.plugins = [plugin];
-    mainChart.update();
 }
 
 function renderWeekChart(user) {
@@ -347,7 +416,7 @@ function renderWeekChart(user) {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, tooltip: { enabled: true } },
             scales: {
-                x: { grid: { display: false }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Inter' } } },
                 y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { display: false }, border: { display: false } }
             }
         }
@@ -386,7 +455,7 @@ function renderMonthChart(user) {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 10 } }, border: { display: false } },
+                x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 10, family: 'Inter' } }, border: { display: false } },
                 y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { display: false }, border: { display: false } }
             }
         }
@@ -414,7 +483,6 @@ function initBottomNav() {
         });
     });
 
-    // Day selector: tapping the chart switches to day selector
     document.querySelector('.chart-container').addEventListener('dblclick', () => {
         showDaySelector();
     });
@@ -461,7 +529,6 @@ function renderHistory() {
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = '';
 
-    // Headers
     ['L','M','X','J','V','S','D'].forEach(d => {
         const h = document.createElement('div');
         h.className = 'cal-header';
@@ -469,18 +536,15 @@ function renderHistory() {
         grid.appendChild(h);
     });
 
-    // Month label
     if (user.days.length > 0) {
         const dt = new Date(user.days[state.dayIdx].date);
         const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
         document.getElementById('history-month').textContent = `${months[dt.getMonth()]} ${dt.getFullYear()}`;
     }
 
-    // Calendar days
     const firstDate = new Date(user.days[0].date);
-    const startDow = (firstDate.getDay() + 6) % 7; // Monday = 0
+    const startDow = (firstDate.getDay() + 6) % 7;
 
-    // Empty cells
     for (let i = 0; i < startDow; i++) {
         const empty = document.createElement('div');
         empty.className = 'cal-day';
@@ -492,7 +556,6 @@ function renderHistory() {
         const cell = document.createElement('div');
         cell.className = `cal-day ${i === state.dayIdx ? 'cal-selected' : ''}`;
 
-        // Color based on IS
         const is = day.daily_is;
         let bg;
         if (is <= 25) bg = '#F5F5F5';
@@ -511,10 +574,7 @@ function renderHistory() {
         grid.appendChild(cell);
     });
 
-    // History chart
     renderHistoryChart(user);
-
-    // Stats
     renderHistoryStats(user);
 }
 
@@ -571,34 +631,53 @@ function renderHistoryStats(user) {
     const maxIS = Math.max(...values);
     const alerts = user.days.reduce((sum, d) => sum + d.alerts, 0);
 
-    // Trend: compare last 7 days vs first 7
-    let trend = 'stable', trendCls = 'trend-stable', trendLabel = '→ Estable';
+    let trendCls = 'trend-stable', trendLabel = '→ Estable';
     if (values.length >= 14) {
         const first7 = values.slice(0, 7).reduce((a, b) => a + b, 0) / 7;
         const last7 = values.slice(-7).reduce((a, b) => a + b, 0) / 7;
-        if (last7 > first7 + 3) { trend = 'up'; trendCls = 'trend-up'; trendLabel = '↑ Subiendo'; }
-        else if (last7 < first7 - 3) { trend = 'down'; trendCls = 'trend-down'; trendLabel = '↓ Bajando'; }
+        if (last7 > first7 + 3) { trendCls = 'trend-up'; trendLabel = '↑ Subiendo'; }
+        else if (last7 < first7 - 3) { trendCls = 'trend-down'; trendLabel = '↓ Bajando'; }
     }
 
     container.innerHTML = `
         <div class="history-stat-card">
-            <div class="hstat-icon">📊</div>
+            <div class="hstat-icon">${SVG.chart}</div>
             <div><div class="hstat-label">IS Medio</div><div class="hstat-value">${avg.toFixed(1)}%</div></div>
             <div class="hstat-trend ${trendCls}">${trendLabel}</div>
         </div>
         <div class="history-stat-card">
-            <div class="hstat-icon">🔴</div>
+            <div class="hstat-icon">${SVG.alertTriangle}</div>
             <div><div class="hstat-label">IS Máximo</div><div class="hstat-value">${maxIS.toFixed(1)}%</div></div>
         </div>
         <div class="history-stat-card">
-            <div class="hstat-icon">🔔</div>
+            <div class="hstat-icon">${SVG.bell}</div>
             <div><div class="hstat-label">Alertas totales</div><div class="hstat-value">${alerts}</div></div>
         </div>
         <div class="history-stat-card">
-            <div class="hstat-icon">📅</div>
+            <div class="hstat-icon">${SVG.calendar}</div>
             <div><div class="hstat-label">Días registrados</div><div class="hstat-value">${user.days.length}</div></div>
         </div>
     `;
+}
+
+// ─── Navigation ──────────────────────────────────────────────
+function initBottomNav() {
+    const btns = document.querySelectorAll('.nav-btn');
+    const container = document.querySelector('.screens-container');
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btns.forEach(b => b.classList.remove('nav-active'));
+            btn.classList.add('nav-active');
+
+            const screen = parseInt(btn.dataset.screen);
+            state.screenIdx = screen;
+            container.style.transform = `translateX(-${screen * 100}%)`;
+
+            if (screen === 1) renderHistory();
+            else renderDay();
+        });
+    });
 }
 
 // ─── Notification ───────────────────────────────────────────
@@ -624,7 +703,6 @@ function showNotification(day) {
     const card = document.getElementById('notif-card');
     card.classList.add('notif-visible');
 
-    // Vibrate if supported
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 }
 

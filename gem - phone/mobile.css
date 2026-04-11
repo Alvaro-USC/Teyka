@@ -1,13 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════
    GEM Mobile — White/Red Health App Aesthetic
    Inspired by Apple Health + Trade Republic
+   Typography: SF Pro style (via Inter) with health-app spacing
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
     --bg: #FAFAFA;
     --bg-card: #FFFFFF;
     --text: #1A1A1A;
-    --text-secondary: #8E8E93;
+    --text-secondary: #6B6B70;
     --text-tertiary: #AEAEB2;
     --border: #E5E5EA;
     --red-100: #FFF5F5;
@@ -29,12 +30,14 @@
 html, body { 
     height: 100%; 
     overflow: hidden; 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     touch-action: pan-y;
     user-select: none;
+    letter-spacing: -0.01em;
 }
 
 /* ─── Status Bar ─────────────────────────────────────────── */
@@ -42,17 +45,18 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 20px;
+    padding: 8px 24px;
     padding-top: calc(var(--safe-top) + 4px);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text);
     background: var(--bg);
     position: sticky;
     top: 0;
     z-index: 100;
+    letter-spacing: 0.02em;
 }
-.status-icons { display: flex; gap: 4px; font-size: 11px; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
 
 /* ─── App Container ──────────────────────────────────────── */
 .app {
@@ -72,7 +76,7 @@ html, body {
     display: flex;
     transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
-    overflow: hidden;
+    min-height: 0;
 }
 .screen {
     min-width: 100%;
@@ -86,27 +90,32 @@ html, body {
     padding-bottom: calc(80px + var(--safe-bottom));
 }
 
-/* ─── Today Header ───────────────────────────────────────── */
-.today-header {
-    display: flex;
-    align-items: center;
-    padding: 8px 20px 4px;
-    gap: 8px;
+/* ─── Greeting Section ───────────────────────────────────── */
+.greeting-section {
+    padding: 4px 24px 0;
 }
-.today-greeting {
-    font-size: 15px;
-    color: var(--text-secondary);
-    font-weight: 400;
-}
-.today-user {
-    font-size: 15px;
-    font-weight: 600;
+.greeting-name {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
     color: var(--text);
 }
+.greeting-sub {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    letter-spacing: 0;
+}
+
+/* User selector trigger — small, top-right floating */
 .user-selector-trigger {
-    margin-left: auto;
-    width: 32px;
-    height: 32px;
+    position: absolute;
+    right: 24px;
+    top: calc(var(--safe-top) + 48px);
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,26 +123,36 @@ html, body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    z-index: 10;
 }
 
 /* ─── IS Gauge ───────────────────────────────────────────── */
 .is-hero {
     text-align: center;
-    padding: 16px 20px 8px;
+    padding: 20px 24px 8px;
 }
 .is-gauge {
     position: relative;
-    width: 140px;
-    height: 140px;
+    width: 154px;
+    height: 154px;
     margin: 0 auto;
 }
 .is-ring {
     width: 100%;
     height: 100%;
 }
+/* Track ring — slightly visible */
+.is-ring circle:first-child {
+    stroke: #EBEBF0;
+    stroke-width: 10;
+}
+/* Active arc — thicker, more visible */
 .is-ring circle:last-child {
+    stroke-width: 10;
+    filter: drop-shadow(0 2px 8px rgba(229, 57, 53, 0.35));
     transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 stroke 0.5s ease;
 }
@@ -146,53 +165,55 @@ html, body {
     gap: 1px;
 }
 .is-number {
-    font-size: 42px;
+    font-size: 48px;
     font-weight: 700;
-    letter-spacing: -2px;
+    letter-spacing: -3px;
     line-height: 1;
     color: var(--text);
     transition: color 0.5s ease;
 }
 .is-unit {
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--text-tertiary);
-    margin-top: 8px;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 10px;
 }
 .is-level {
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 8px;
-    padding: 4px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 5px 16px;
     border-radius: 20px;
     display: inline-block;
     transition: all 0.5s ease;
+    letter-spacing: 0;
 }
 .is-date {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-tertiary);
-    margin-top: 4px;
+    margin-top: 6px;
+    font-weight: 400;
 }
 .is-level-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    margin: 6px auto 0;
+    margin: 8px auto 0;
     transition: background 0.5s ease;
 }
 
-/* Level colors */
-.level-optimal .is-number { color: var(--text); }
-.level-optimal .is-level { background: #F0F0F0; color: var(--text-secondary); }
+/* Level colors — much stronger contrast */
+.level-optimal .is-number { color: #3A3A3C; }
+.level-optimal .is-level { background: #F0F0F2; color: var(--text-secondary); }
 .level-optimal .is-level-dot { background: #C7C7CC; }
 
-.level-attention .is-number { color: var(--red-300); }
-.level-attention .is-level { background: var(--red-100); color: var(--red-400); }
-.level-attention .is-level-dot { background: var(--red-300); }
+.level-attention .is-number { color: #D84315; }
+.level-attention .is-level { background: var(--red-100); color: var(--red-500); }
+.level-attention .is-level-dot { background: var(--red-400); }
 
-.level-alert .is-number { color: var(--red-400); }
-.level-alert .is-level { background: var(--red-200); color: var(--red-500); }
-.level-alert .is-level-dot { background: var(--red-400); }
+.level-alert .is-number { color: var(--red-500); }
+.level-alert .is-level { background: var(--red-200); color: var(--red-600); }
+.level-alert .is-level-dot { background: var(--red-500); }
 
 .level-critical .is-number { color: var(--red-600); }
 .level-critical .is-level { background: var(--red-500); color: #FFF; }
@@ -203,10 +224,20 @@ html, body {
     50% { transform: scale(1.6); opacity: 0.5; }
 }
 
+/* ─── Section titles (health-app style) ──────────────────── */
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+}
+
 /* ─── Main Chart (Trade Republic Style) ──────────────────── */
 .chart-container {
     position: relative;
-    padding: 0 12px;
+    padding: 0 16px;
     height: 220px;
     margin: 10px 0;
 }
@@ -230,13 +261,13 @@ html, body {
 }
 .chart-tooltip.visible { opacity: 1; }
 .tooltip-hour { font-weight: 400; font-size: 11px; opacity: 0.7; }
-.tooltip-is { font-weight: 700; font-size: 18px; }
+.tooltip-is { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
 
 /* ─── Range Selector ─────────────────────────────────────── */
 .range-selector {
     display: flex;
     gap: 0;
-    margin: 0 20px 16px;
+    margin: 0 24px 20px;
     background: #F2F2F7;
     border-radius: 10px;
     padding: 3px;
@@ -248,11 +279,12 @@ html, body {
     background: transparent;
     font-family: inherit;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-secondary);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.25s ease;
+    letter-spacing: 0;
 }
 .range-btn.range-active {
     background: var(--bg-card);
@@ -262,16 +294,8 @@ html, body {
 
 /* ─── Rest Points ────────────────────────────────────────── */
 .rest-summary {
-    padding: 0 20px;
-    margin-bottom: 20px;
-}
-.rest-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    padding: 0 24px;
+    margin-bottom: 24px;
 }
 .rest-points {
     display: flex;
@@ -279,14 +303,16 @@ html, body {
     flex-wrap: wrap;
 }
 .rest-point {
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 12px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
+    letter-spacing: 0;
 }
+.rest-point svg { flex-shrink: 0; }
 .rest-point.rest-high {
     background: var(--red-200);
     color: var(--red-600);
@@ -296,22 +322,14 @@ html, body {
     color: #E65100;
 }
 .rest-point.rest-low {
-    background: #F0F0F0;
-    color: var(--text-secondary);
+    background: #E8F5E9;
+    color: #2E7D32;
 }
 
 /* ─── Health Grid ────────────────────────────────────────── */
 .health-section, .decomp-section {
-    padding: 0 20px;
-    margin-bottom: 20px;
-}
-.health-title, .decomp-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
+    padding: 0 24px;
+    margin-bottom: 24px;
 }
 .health-grid {
     display: grid;
@@ -321,27 +339,32 @@ html, body {
 .health-card {
     background: var(--bg-card);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--border);
 }
-.health-icon { font-size: 20px; margin-bottom: 6px; }
+.health-icon-wrap {
+    margin-bottom: 8px;
+    line-height: 0;
+}
 .health-label {
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
 }
 .health-value {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
-    letter-spacing: -1px;
-    margin: 2px 0;
+    letter-spacing: -1.5px;
+    margin: 4px 0 2px;
+    line-height: 1.1;
 }
 .health-unit {
     font-size: 11px;
     color: var(--text-tertiary);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    font-weight: 400;
 }
 .health-bar {
     height: 4px;
@@ -366,23 +389,27 @@ html, body {
 .decomp-card {
     background: var(--bg-card);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--border);
 }
 .decomp-label {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-secondary);
+    letter-spacing: 0;
 }
 .decomp-value {
-    font-size: 32px;
+    font-size: 34px;
     font-weight: 700;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin: 2px 0;
 }
 .decomp-weight {
     font-size: 11px;
     color: var(--text-tertiary);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
 }
 .decomp-bar {
     height: 4px;
@@ -399,22 +426,24 @@ html, body {
 
 /* ─── History ────────────────────────────────────────────── */
 .history-header {
-    padding: 8px 20px 16px;
+    padding: 8px 24px 16px;
 }
 .history-header h2 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
+    letter-spacing: -0.02em;
 }
 .history-month {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-secondary);
     margin-top: 2px;
+    font-weight: 400;
 }
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
-    padding: 0 16px;
+    padding: 0 20px;
     margin-bottom: 20px;
 }
 .cal-header {
@@ -422,7 +451,8 @@ html, body {
     color: var(--text-tertiary);
     text-align: center;
     padding: 4px 0;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 .cal-day {
     aspect-ratio: 1;
@@ -449,33 +479,34 @@ html, body {
     border-radius: 50%;
 }
 .history-chart-container {
-    padding: 0 16px;
+    padding: 0 20px;
     height: 180px;
     margin-bottom: 16px;
 }
 .history-stats {
-    padding: 0 20px;
+    padding: 0 24px;
     margin-bottom: 20px;
 }
 .history-stat-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 16px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
-.hstat-icon { font-size: 24px; }
-.hstat-label { font-size: 13px; color: var(--text-secondary); }
-.hstat-value { font-size: 20px; font-weight: 700; }
+.hstat-icon { line-height: 0; }
+.hstat-label { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
+.hstat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 .hstat-trend {
     margin-left: auto;
     font-size: 13px;
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 12px;
+    letter-spacing: 0;
 }
 .hstat-trend.trend-up { background: var(--red-100); color: var(--red-500); }
 .hstat-trend.trend-down { background: #E8F5E9; color: #2E7D32; }
@@ -508,14 +539,17 @@ html, body {
     cursor: pointer;
     font-family: inherit;
     transition: all 0.2s;
+    color: var(--text-tertiary);
 }
-.nav-icon { font-size: 22px; }
+.nav-svg { width: 24px; height: 24px; }
 .nav-label {
     font-size: 10px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-tertiary);
     transition: color 0.2s;
+    letter-spacing: 0.01em;
 }
+.nav-btn.nav-active { color: var(--red-500); }
 .nav-btn.nav-active .nav-label { color: var(--red-500); }
 
 /* ─── iOS Notification ───────────────────────────────────── */
@@ -558,27 +592,31 @@ html, body {
     gap: 8px;
     margin-bottom: 8px;
 }
-.notif-icon { font-size: 20px; }
+.notif-icon { line-height: 0; }
 .notif-app {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text);
+    letter-spacing: 0;
 }
 .notif-time {
     margin-left: auto;
     font-size: 12px;
     color: var(--text-tertiary);
+    font-weight: 400;
 }
 .notif-title {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 4px;
+    letter-spacing: -0.01em;
 }
 .notif-body {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
-    line-height: 1.4;
-    margin-bottom: 12px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+    font-weight: 400;
 }
 .notif-actions {
     display: flex;
@@ -586,14 +624,15 @@ html, body {
 }
 .notif-btn {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
     border-radius: 12px;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.1s;
+    letter-spacing: 0;
 }
 .notif-btn:active { transform: scale(0.96); }
 .notif-btn-primary {
@@ -625,7 +664,7 @@ html, body {
 .modal-card {
     background: var(--bg-card);
     border-radius: 20px 20px 0 0;
-    padding: 12px 20px 30px;
+    padding: 12px 24px 30px;
     width: 100%;
     max-width: 430px;
     max-height: 60vh;
@@ -644,9 +683,10 @@ html, body {
     margin: 0 auto 14px;
 }
 .modal-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     margin-bottom: 16px;
+    letter-spacing: -0.02em;
 }
 .modal-done {
     display: block;
@@ -667,7 +707,7 @@ html, body {
 .user-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     padding: 14px;
     border-radius: 14px;
     cursor: pointer;
@@ -677,24 +717,25 @@ html, body {
 .user-item:active { background: #F2F2F7; }
 .user-item.user-selected { background: var(--red-100); }
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #FFF;
 }
 .user-info { flex: 1; }
-.user-name { font-size: 15px; font-weight: 600; }
-.user-detail { font-size: 12px; color: var(--text-secondary); }
+.user-name { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.user-detail { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
 .user-is {
     font-size: 16px;
     font-weight: 700;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 10px;
+    letter-spacing: -0.5px;
 }
 
 /* Day slider */
@@ -720,25 +761,138 @@ html, body {
     margin-top: 10px;
     font-size: 14px;
     color: var(--text-secondary);
+    font-weight: 500;
+}/* ─── History Screen ──────────────────────────────────────── */
+.history-header {
+    padding: 24px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
+.history-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+.history-month {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--red-500);
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    padding: 0 24px 24px;
+}
+.cal-header {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+}
+.cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.cal-day:active { transform: scale(0.9); }
+.cal-selected {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+}
+.history-chart-container {
+    height: 180px;
+    padding: 0 24px;
+    margin-bottom: 24px;
+}
+#history-stats {
+    padding: 0 24px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.history-stat-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.hstat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--red-100);
+    color: var(--red-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hstat-icon svg { width: 18px; height: 18px; }
+.hstat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+.hstat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+}
+.hstat-trend {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    align-self: flex-start;
+}
+.trend-stable { background: #F2F2F7; color: var(--text-secondary); }
+.trend-up { background: #FFCDD2; color: #C62828; }
+.trend-down { background: #E8F5E9; color: #2E7D32; }
 
 /* ─── Responsive Desktop Preview ─────────────────────────── */
 @media (min-width: 500px) {
     body {
-        background: #E8E8ED;
+        background: #141415; /* Fondo de escritorio oscuro premium */
         display: flex;
         align-items: center;
         justify-content: center;
+        margin: 0;
+        padding: 0;
     }
     .app {
-        height: 85vh;
-        max-height: 844px;
-        border-radius: 40px;
+        height: 92vh; /* Se adapta a portátiles estrujados sin salirse */
+        max-height: 852px; /* Nunca más alto que el cristal real */
+        aspect-ratio: 9 / 19.5; /* Fuerza un ratio esbelto estricto de iOS moderno */
+        width: auto; /* Permite que el ancho baje dinámicamente si hay poca altura */
+        border-radius: 46px; /* Curvatura realista de hardware iOS */
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15),
-                    0 0 0 8px #1A1A1A,
-                    0 0 0 10px #333;
+        /* Recreación de carcasa de teléfono con biseles */
+        box-shadow: 0 0 0 12px #09090B, 
+                    0 0 0 14px #2C2C2E,
+                    0 35px 84px rgba(0,0,0,0.7);
+        /* Esto genera un Containing Block que encarcela a todos los descendientes fixed */
+        transform: translateZ(0); 
+        margin: auto;
     }
-    .notif-overlay { max-width: 430px; margin: 0 auto; }
-    .modal-overlay { max-width: 430px; margin: 0 auto; }
+    /* En el frame delimitado convertimos overlays a absolute para máxima garantía */
+    .notif-overlay, .modal-overlay, .bottom-nav { 
+        position: absolute !important;
+        max-width: 100% !important; 
+        margin: 0 !important; 
+    }
 }
