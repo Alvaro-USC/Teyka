@@ -1,4 +1,4 @@
-# Proyecto GEM — Documentación Técnica Completa
+# Proyecto Teyka — Documentación Técnica Completa
 
 > **Gestión del Estado Nervioso**  
 > De la biometría pasiva a la intervención proactiva.  
@@ -8,7 +8,7 @@
 
 ## 1. Visión General
 
-El Proyecto GEM propone un cambio de paradigma: pasar del **bloqueo reactivo de aplicaciones** a la **gestión proactiva del estado nervioso**. Utilizamos la biometría como "alarma temprana" de la pérdida de autorregulación cognitiva.
+El Proyecto Teyka propone un cambio de paradigma: pasar del **bloqueo reactivo de aplicaciones** a la **gestión proactiva del estado nervioso**. Utilizamos la biometría como "alarma temprana" de la pérdida de autorregulación cognitiva.
 
 El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina estrés fisiológico (variabilidad cardíaca) con patrones de comportamiento digital (uso de pantalla, actividad física). Cuando el IS supera el 75%, el sistema genera una **intervención proactiva (Nudge)** sugiriendo actividades alternativas.
 
@@ -42,7 +42,7 @@ El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina
 
 #### Variables de Screen (por segmento: morning/afternoon/evening/night/allday)
 
-| Variable RAPIDS | Descripción | Uso en GEM |
+| Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumdurationunlock` | Suma total de tiempo con pantalla desbloqueada (min) | **screen_min** — Tiempo total de pantalla |
 | `countepisodeunlock` | Número de veces que se desbloqueó el teléfono | **unlocks** — Frecuencia de uso |
@@ -53,7 +53,7 @@ El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina
 
 #### Variables de Steps (por segmento)
 
-| Variable RAPIDS | Descripción | Uso en GEM |
+| Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumsteps` | Suma total de pasos | **steps** — Nivel de actividad física |
 | `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) | ⚠️ Ver corrección abajo |
@@ -69,7 +69,7 @@ sedentary_bout = tiempo_total_segmento - active_bout
 
 Cada segmento tiene ~360 min (6 horas), por lo que el `allday` reporta ~1200-1400 min (20-23h), incluyendo **sueño e inactividad total**. Esto NO es sedentarismo en el sentido clínico.
 
-**Corrección aplicada en GEM:**
+**Corrección aplicada en Teyka:**
 ```python
 real_sedentary = 960 - active_min_allday  # 960 = 16 horas despierto
 ```
@@ -383,7 +383,7 @@ El dashboard incluye un reproductor temporal que avanza día a día por el histo
 ## 9. Estructura de Archivos
 
 ```
-gem/
+Teyka/
 ├── extract_gem.py      # Pipeline ETL: Fitbit + GLOBEM → gem_data.json
 ├── gem_data.json       # Datos procesados (8 usuarios × ~40 días)
 ├── index.html          # Dashboard SPA
@@ -398,7 +398,7 @@ gem/
 
 ### Generar datos
 ```bash
-cd gem
+cd Teyka
 python extract_gem.py
 ```
 
@@ -408,7 +408,7 @@ Requiere:
 
 ### Lanzar dashboard
 ```bash
-cd gem
+cd Teyka
 python -m http.server 8080
 # Abrir http://localhost:8080
 ```

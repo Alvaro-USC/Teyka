@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   Proyecto GEM — Styles
+   Proyecto Teyka — Styles
    Sober dark Grafana-style dashboard for IS visualization
    ═══════════════════════════════════════════════════════════════ */
 
@@ -227,7 +227,7 @@ section { padding: 100px 48px 60px; max-width: 1320px; margin: 0 auto; }
 .ps-apis { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
 .api-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
 .api-badge.cal { background: rgba(59,130,246,0.08); color: var(--accent); }
-.api-badge.gem { background: rgba(59,130,246,0.08); color: var(--accent); }
+.api-badge.Teyka { background: rgba(59,130,246,0.08); color: var(--accent); }
 
 /* ─── FOOTER ──────────────────────────────────────────────────── */
 footer { padding: 40px 48px 20px; border-top: 1px solid var(--border); max-width: 1320px; margin: 0 auto; }
