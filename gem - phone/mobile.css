@@ -240,7 +240,7 @@ html, body {
 /* Track ring — slightly visible */
 .is-ring circle:first-child {
     stroke: #EBEBF0;
-    stroke-width: 10;
+    stroke-width: 8;
 }
 /* Active arc — thicker, more visible */
 .is-ring circle:last-child {
@@ -1170,35 +1170,35 @@ html, body {
 /* ─── Hobby Selector ─── */
 .ob-hobbies-content {
     width: 100%;
-    max-width: 380px;
+    max-width: 320px;
     text-align: center;
-    padding: 30px 0;
+    padding: 0;
 }
 .ob-hobbies-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.02em;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     color: var(--text);
 }
 .ob-hobbies-desc {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
-    margin-bottom: 24px;
-    line-height: 1.5;
+    margin-bottom: 16px;
+    line-height: 1.4;
 }
 .ob-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 .ob-tag {
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    padding: 10px 18px;
+    padding: 8px 14px;
     border-radius: 100px;
     border: 1.5px solid var(--border);
     background: var(--bg-card);
@@ -1220,14 +1220,14 @@ html, body {
 
 .ob-custom-wrap {
     display: flex;
-    gap: 10px;
-    margin-bottom: 28px;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 .ob-custom-input {
     flex: 1;
     font-family: inherit;
-    font-size: 14px;
-    padding: 12px 18px;
+    font-size: 13px;
+    padding: 10px 16px;
     border-radius: 100px;
     border: 1.5px solid var(--border);
     background: var(--bg-card);
@@ -1242,8 +1242,8 @@ html, body {
     border-color: var(--red-400);
 }
 .ob-custom-add {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 1.5px solid var(--border);
     background: var(--bg-card);

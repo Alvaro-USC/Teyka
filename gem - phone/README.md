@@ -56,10 +56,10 @@ El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina
 | Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumsteps` | Suma total de pasos | **steps** — Nivel de actividad física |
-| `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) | ⚠️ Ver corrección abajo |
+| `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) |  Ver corrección abajo |
 | `sumdurationactivebout` | Duración total de bouts activos (min) | **active_min** — Tiempo realmente activo |
 
-#### ⚠️ Corrección del Sedentarismo
+####  Corrección del Sedentarismo
 
 El campo `sumdurationsedentarybout` de RAPIDS **NO mide sedentarismo real**. RAPIDS lo calcula como:
 
@@ -80,10 +80,10 @@ Esto da valores realistas de 600-860 min de sedentarismo diurno, que es el compl
 
 | Segmento | Horas | Duración |
 |---|---|---|
-| 🌅 Morning | 06:00 — 12:00 | 6 horas |
-| ☀️ Afternoon | 12:00 — 18:00 | 6 horas |
-| 🌆 Evening | 18:00 — 00:00 | 6 horas |
-| 🌙 Night | 00:00 — 06:00 | 6 horas |
+|  Morning | 06:00 — 12:00 | 6 horas |
+|  Afternoon | 12:00 — 18:00 | 6 horas |
+|  Evening | 18:00 — 00:00 | 6 horas |
+|  Night | 00:00 — 06:00 | 6 horas |
 
 ---
 
@@ -260,7 +260,7 @@ Esto evita el problema de comparar un usuario activo (22k pasos/día) con uno se
 
 ### 5.3 Reglas de Clasificación
 
-#### 🟢 Productivo
+####  Productivo
 Un segmento se clasifica como **productivo** cuando:
 - El tiempo de pantalla está **por debajo de la mediana** del usuario para ese segmento
 - **O** los pasos están **por encima del percentil 25** del usuario
@@ -268,7 +268,7 @@ Un segmento se clasifica como **productivo** cuando:
 
 **Interpretación:** Uso funcional del móvil — consultas rápidas, mensajes, mientras se mantiene actividad.
 
-#### 🔴 Entretenimiento
+####  Entretenimiento
 Un segmento se clasifica como **entretenimiento** cuando se cumplen **dos condiciones simultáneas**:
 
 1. **Pantalla por encima de la mediana** del usuario para ese segmento
@@ -279,7 +279,7 @@ Un segmento se clasifica como **entretenimiento** cuando se cumplen **dos condic
 
 **Interpretación:** Absorción pasiva en el móvil con inmovilidad prolongada.
 
-#### ⚪ None
+####  None
 Si el tiempo de pantalla en ese segmento es <3 minutos → dato insuficiente.
 
 ### 5.4 Señales Conductuales
@@ -328,16 +328,16 @@ Cuando IS > 75%, el sistema activa la intervención proactiva.
 ### 7.2 Flujo del Nudge
 
 ```
-1. 📡 Monitoreo Pasivo
+1.  Monitoreo Pasivo
    → Smartwatch captura RMSSD, móvil registra pantalla y actividad
 
-2. 🧠 Motor IS
+2.  Motor IS
    → StressScore + BehaviorScore → IS > 75% → Trigger
 
-3. 🔔 Nudge Contextual
+3.  Nudge Contextual
    → Sugerencia de actividad alternativa adaptada al perfil
 
-4. 🔄 Aprendizaje Continuo
+4.  Aprendizaje Continuo
    → Feedback del usuario ajusta pesos para futuras intervenciones
 ```
 

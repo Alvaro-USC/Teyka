@@ -1,60 +1,54 @@
-# 📱 Proyecto Teyka: Smart Wellbeing Co-Pilot
-> **"Si tu smartwatch ya sabe cuándo debes despertarte, ¿por qué no permitirle que sepa cuándo debes soltar el móvil?"**
+# Proyecto Teyka: Gestión del Estado Nervioso
 
-**Proyecto Teyka** es una solución tecnológica diseñada para combatir el uso compulsivo del smartphone mediante el análisis de datos biométricos en tiempo real. A diferencia de las aplicaciones restrictivas, Teyka actúa como un "copiloto de bienestar" que detecta estados de fatiga y estrés para sugerir actividades alternativas personalizadas.
+> "De la biometría pasiva a la intervención proactiva."
 
----
-
-## 📑 Fundamentos Académicos
-La validez técnica de Teyka se apoya en investigaciones recientes de detección pasiva y salud mental digital. El proyecto utiliza como base científica los hallazgos del ecosistema **StudentLife** y estudios longitudinales de 2021:
-
-> **Cita Principal:** > Wang, W., et al. (2021). *"Social Sensing: Predicting Well-being from Heart Rate Variability and Smartphone Sensing Data in the Wild."* > Este estudio demuestra que la combinación de **HRV (Heart Rate Variability)** y los logs de uso del smartphone permite predecir niveles de estrés y bienestar con una precisión significativamente mayor que el uso de una sola fuente de datos. 
-
-**Evidencia clave utilizada:**
-* **Correlación Biométrica:** Una disminución en el marcador RMSSD precede a episodios de baja autorregulación cognitiva, facilitando el uso compulsivo de aplicaciones de gratificación instantánea.
-* **Patrones de Intervención:** La investigación de *Wang et al.* confirma que los datos de sensores móviles (acelerómetro + pantalla) son indicadores robustos de fatiga mental.
+Proyecto Teyka es una solución tecnológica diseñada para combatir la pérdida de autorregulación cognitiva mediante el análisis de datos biométricos en tiempo real. A diferencia del bloqueo reactivo tradicional, Teyka actúa como un monitor continuo que detecta la saturación del sistema nervioso autónomo para sugerir desvíos psicológicos de bajo coste basados en IA.
 
 ---
 
-## 💡 Nuestra Solución: El Índice de Saturación (IS)
-Teyka implementa un algoritmo que cruza estos hallazgos académicos con datos en tiempo real para intervenir de forma **proactiva**.
+## Arquitectura del Producto
 
-### El Algoritmo
-El sistema calcula la probabilidad de uso compulsivo mediante la siguiente ponderación de variables:
+El proyecto se divide en tres productos integrados en este repositorio:
 
-$$IS = (0.60 \cdot \Delta RMSSD) + (0.40 \cdot \text{ContextoBehavioral})$$
-
-Donde:
-* **$\Delta RMSSD$:** Desviación porcentual de la variabilidad cardíaca respecto a la línea base del usuario.
-* **Contexto Behavioral:** Ratio de sedentarismo (pasos = 0) vs. tiempo de pantalla activa en apps no productivas.
-
----
-
-## 🛠 Workflow Técnico
-
-El MVP se estructura mediante la integración y *backtesting* de los siguientes datasets:
-
-1.  **Fitbit Dataset:** Extracción de métricas fisiológicas (RMSSD e IBI) para determinar el estado del sistema nervioso autónomo.
-2.  **GLOBEM / StudentLife (2021 Edition):** Análisis de la taxonomía de aplicaciones (Social vs. Herramientas) y niveles de actividad física.
-3.  **Modelo Predictivo:** Implementación de una arquitectura de redes neuronales recurrentes (RNN) para identificar la "ventana de vulnerabilidad" previa al inicio de una sesión de procrastinación.
+1. **Dashboard de Presentación (Frontend Web)**
+   - **Ruta:** `gem/index.html`
+   - **Propósito:** Panel visual de alto nivel que exhibe los fundamentos biométricos en tiempo real, ideal para la comprensión inmediata del jurado.
+2. **Panel de Administración e Investigación**
+   - **Ruta:** `gem/admin.html`
+   - **Propósito:** Interfaz analítica para investigadores. Permite observar las correlaciones de Pearson, los algoritmos de backtesting profundo, la base de datos de usuarios y exportar métricas en crudo.
+3. **Aplicación Móvil (Simulador de Usuario Final)**
+   - **Ruta:** `gem - phone/mobile.html`
+   - **Propósito:** Prototipo funcional que el usuario experimenta. Monitoriza el Índice de Saturación (IS) intradía en tiempo real y ejecuta intervenciones proactivas generadas dinámicamente mediante el ecosistema Gemini de Inteligencia Artificial.
 
 ---
 
-## 🚀 Metodología de Validación
+## Fundamentos Científicos
 
-* **Validación por Backtesting:** Aplicación del modelo sobre el dataset de 4 años de GLOBEM para comprobar si el IS predice con éxito los episodios de uso prolongado registrados.
-  
-* **Taxonomía de Sugerencias:** Clasificación de respuestas según el estado detectado:
-    * *Estrés detectado (HRV ↓):* Sugerencias de baja estimulación (respiración, hidratación).
-    * *Aburrimiento detectado (Sedentarismo ↑):* Sugerencias de activación (ejercicio, hobbies).
+La validez técnica de Teyka se apoya sistemáticamente en el ecosistema de investigación **GLOBEM** y estudios longitudinales recientes.
+
+> Wang, W., et al. (2021). "Social Sensing: Predicting Well-being from Heart Rate Variability and Smartphone Sensing Data in the Wild."
+
+La evidencia demuestra que una disminución acentuada en el marcador **RMSSD (Root Mean Square of Successive Differences)** precede consistentemente a los episodios de baja autorregulación, facilitando ciclos de uso prolongado de pantallas por inercia. Teyka combina la Variabilidad de la Frecuencia Cardíaca (HRV) y logs de acelerometría y pantalla para identificar estos contextos anómalos.
+
+---
+
+## El Índice de Saturación (IS)
+
+El núcleo algorítmico del proyecto reside en el cálculo en tiempo real del Índice de Saturación (IS). Este KPI unificado permite evaluar la vulnerabilidad cognitiva del usuario integrando su biometría y su comportamiento.
+
+El sistema pondera estas divergencias respecto al marco base (baseline) individual del usuario:
+- Desviación fisiológica derivada de intervalos R-R.
+- Entropía computacional obtenida a través de la frecuencia de interacciones con el dispositivo en tiempos o fragmentos considerados de inactividad biológica.
 
 ---
 
-## 🛠 Stack Tecnológico
-* **Data Processing:** Pandas, NumPy.
-* **Machine Learning:** PyTorch para el entrenamiento del modelo de series temporales.
-* **Datasets:** Fitbit Kaggle Dataset & GLOBEM (StudentLife longitudinal study).
-* **Integración:** Propuesta de API para Gemini/Google Workspace para personalización de sugerencias.
+## Stack Tecnológico
+
+* **Procesamiento y Extracción (ETL):** Python (Pandas, NumPy)
+* **Visualización Dinámica:** HTML5, CSS3 Avanzado, Vanilla JavaScript, Chart.js
+* **Motor Cognitivo (Nudges):** Google Gemini Pro / Flash AI 
+* **Data Mining:** Datasets Fitbit Fitabase (Kaggle) y el estudio longitudinal GLOBEM (University of Washington).
 
 ---
-> **Proyecto Teyka** — *Basado en evidencia científica para una vida digital equilibrada.*
+
+> Proyecto Teyka - Impacthon USC 2026

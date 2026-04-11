@@ -4,6 +4,14 @@
    Rest periods: vertical red bands instead of dots
    ═══════════════════════════════════════════════════════════════ */
 
+// ─── Deterministic RNG para Demos ───────────────────────────────
+// Sobrescribimos Math.random con una semilla fija para que al recargar (F5) los picos sean idénticos
+let _seed = 1337;
+Math.random = function() {
+    var x = Math.sin(_seed++) * 10000;
+    return x - Math.floor(x);
+};
+
 // ─── State ──────────────────────────────────────────────────
 let DATA = null;
 let state = { userIdx: 0, dayIdx: 0, screenIdx: 0, range: 'day', notifShown: false };
@@ -249,8 +257,9 @@ function renderDay() {
     }
 
     // Maybe trigger notification
+    if (window.pendingNotifTimeout) clearTimeout(window.pendingNotifTimeout);
     if (maxContextIS > 70 && !state.notifShown) {
-        showNotification(day);
+        window.pendingNotifTimeout = setTimeout(() => showNotification(day), 2500);
     }
 }
 
@@ -908,7 +917,7 @@ function showDailySummary() {
 // ONBOARDING FLOW
 // ═══════════════════════════════════════════════════════════════
 
-const OB_STEPS = ['ob-welcome', 'ob-gauge', 'ob-chart', 'ob-health', 'ob-notif', 'ob-hobbies'];
+const OB_STEPS = ['ob-welcome', 'ob-gauge', 'ob-chart', 'ob-notif', 'ob-hobbies'];
 let obStep = 0;
 let userHobbies = [];
 
@@ -923,13 +932,20 @@ function initOnboarding() {
         return;
     }
 
-    // Auto-advance from welcome after 3.5s
+    // Auto-advance from welcome after 8s
     setTimeout(() => {
         if (obStep === 0) advanceOnboarding();
-    }, 3500);
+    }, 8000);
 
     // Next button
     document.getElementById('ob-next-btn').addEventListener('click', advanceOnboarding);
+
+    // Personalization buttons
+    const btnYes = document.getElementById('ob-personalize-yes');
+    if (btnYes) btnYes.addEventListener('click', advanceOnboarding);
+    
+    const btnNo = document.getElementById('ob-personalize-no');
+    if (btnNo) btnNo.addEventListener('click', finishOnboarding);
 
     // Hobby tags toggle
     document.getElementById('ob-tags').addEventListener('click', (e) => {
@@ -984,9 +1000,7 @@ function advanceOnboarding() {
         
         const scrollContainer = document.querySelector('.screen-scroll');
         if (scrollContainer) {
-            if (OB_STEPS[obStep] === 'ob-health') {
-                scrollContainer.scrollTo({top: scrollContainer.scrollHeight, behavior: 'smooth'});
-            } else if (OB_STEPS[obStep] === 'ob-gauge' || OB_STEPS[obStep] === 'ob-chart') {
+            if (OB_STEPS[obStep] === 'ob-gauge' || Math.abs(obStep) === 1 || OB_STEPS[obStep] === 'ob-chart') {
                 scrollContainer.scrollTo({top: 0, behavior: 'smooth'});
             }
         }
@@ -997,17 +1011,17 @@ function advanceOnboarding() {
         d.classList.toggle('ob-dot-active', i === obStep);
     });
 
-    // Toggle overlay transparency for tour steps (1-4) so app is visible behind
+    // Toggle overlay transparency for tour steps (1-3) so app is visible behind
     const overlay = document.getElementById('onboarding-overlay');
-    if (obStep >= 1 && obStep <= 4) {
+    if (obStep >= 1 && obStep <= 3) {
         overlay.classList.add('ob-tour-mode');
     } else {
         overlay.classList.remove('ob-tour-mode');
     }
 
-    // Hide nav on last step (hobby selector has its own "Empezar" button)
+    // Hide nav on specific custom steps
     const nav = document.getElementById('ob-nav');
-    if (obStep === OB_STEPS.length - 1) {
+    if (OB_STEPS[obStep] === 'ob-notif' || OB_STEPS[obStep] === 'ob-hobbies') {
         nav.classList.add('ob-nav-hidden');
     } else {
         nav.classList.remove('ob-nav-hidden');

@@ -86,10 +86,10 @@ Impacthon/
 | Variable RAPIDS | Descripción | Uso en Teyka |
 |---|---|---|
 | `sumsteps` | Suma total de pasos | **steps** — Nivel de actividad física |
-| `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) | ⚠️ Ver corrección abajo |
+| `sumdurationsedentarybout` | Duración total de bouts sedentarios (min) |  Ver corrección abajo |
 | `sumdurationactivebout` | Duración total de bouts activos (min) | **active_min** — Tiempo realmente activo |
 
-#### ⚠️ Corrección del Sedentarismo
+####  Corrección del Sedentarismo
 
 El campo `sumdurationsedentarybout` de RAPIDS **NO mide sedentarismo real**. RAPIDS lo calcula como:
 
@@ -110,10 +110,10 @@ Esto da valores realistas de 600-860 min de sedentarismo diurno, que es el compl
 
 | Segmento | Horas | Duración |
 |---|---|---|
-| 🌅 Morning | 06:00 — 12:00 | 6 horas |
-| ☀️ Afternoon | 12:00 — 18:00 | 6 horas |
-| 🌆 Evening | 18:00 — 00:00 | 6 horas |
-| 🌙 Night | 00:00 — 06:00 | 6 horas |
+|  Morning | 06:00 — 12:00 | 6 horas |
+|  Afternoon | 12:00 — 18:00 | 6 horas |
+|  Evening | 18:00 — 00:00 | 6 horas |
+|  Night | 00:00 — 06:00 | 6 horas |
 
 ---
 
@@ -351,13 +351,13 @@ steps_p25  = percentil 25 de pasos del usuario en ese segmento
 
 ### 6.3 Reglas de Clasificación
 
-#### 🟢 Productivo
+####  Productivo
 Un segmento se clasifica como **productivo** cuando:
 - El tiempo de pantalla está **por debajo de la mediana** del usuario para ese segmento
 - **O** los pasos están **por encima del percentil 25** del usuario
 - **O** hay muchos desbloqueos con sesiones cortas (patrón de "check-and-go")
 
-#### 🔴 Entretenimiento
+####  Entretenimiento
 Un segmento se clasifica como **entretenimiento** cuando se cumplen **dos condiciones simultáneas**:
 
 1. **Pantalla por encima de la mediana** del usuario para ese segmento
@@ -366,7 +366,7 @@ Un segmento se clasifica como **entretenimiento** cuando se cumplen **dos condic
    - **Patrón binge:** ≤5 desbloqueos con sesión media >15 min
    - **Sesión dominante:** una sesión >30 min que ocupa >60% del tiempo total
 
-#### ⚪ None
+####  None
 Si el tiempo de pantalla en ese segmento es <3 minutos → dato insuficiente.
 
 ---
@@ -399,18 +399,18 @@ Siguiendo la prevención de falsos positivos, la intervención preventiva requie
 La app incorpora **Teyka AI**, un motor de intervención impulsado por **Google Gemini 1.5 Flash** (vía Vertex AI / REST API) embebido en el frontend. El pipeline operativo es:
 
 ```
-1. 📡 Monitoreo Pasivo
+1.  Monitoreo Pasivo
    → Smartwatch captura RMSSD, móvil registra pantalla y uso.
 
-2. 🧠 Evaluación Dual (Stress + Context)
+2.  Evaluación Dual (Stress + Context)
    → Si el Índice de Saturación (IS) supera el 70% bajo un foco inercial de Ocio, se activa la capa de inferencia.
 
-3. ✨ Generación Semántica (Teyka AI)
+3.  Generación Semántica (Teyka AI)
    → El cliente web monta un 'System Prompt' al milisegundo fusionando el IS actual + las Aficiones (Hobbies) guardadas del usuario en LocalStorage (incluyendo las creadas a mano).
    → Inyecta a la API de lenguaje: "Escribe una orden de 8 palabras, amable y directa, sobre cómo usar [este hobby específico] para relajar su estrés ahora mismo".
    → La API sintetiza texto y la UI oscurece el fondo mientras "calcula el nudge".
 
-4. 🛡️ Tolerancia a Fallos (Graceful Degradation)
+4.  Tolerancia a Fallos (Graceful Degradation)
    → Dado el entorno volátil de hackathon, si las *API Keys* se agotan o el servidor de Google rechaza la llamada, la función en JS atrapa el `catch()` y recurre silenciosamente a un diccionario de plantillas de Fallback (Offline Mode). El usuario siempre recibe su intervención biométrica estructurada al instante.
 ```
 
@@ -449,7 +449,7 @@ Panel de investigación para data mining y observabilidad. Dark theme profesiona
 |---|---|
 | **Overview** | 6 KPIs globales, histograma IS, comparativa por usuario (barras horizontales), donut Entretenimiento vs Productivo, RMSSD baseline vs diario, Fitbit RMSSD poblacional |
 | **Usuarios** | Tabla ordenable y filtrable por PID, IS, pantalla, pasos, sedentarismo. Click en fila → panel de detalle con gráfico IS diario, descomposición Stress vs Behavior, timeline de segmentos entertainment/productive |
-| **Correlaciones** | 4 scatter plots: Pantalla↔IS, Pasos↔Stress, RMSSD↔IS, Sedentarismo↔Behavior. Matriz de correlación 5×5 con heatmap |
+| **Correlaciones** | 4 scatter plots: PantallaIS, PasosStress, RMSSDIS, SedentarismoBehavior. Matriz de correlación 5×5 con heatmap |
 | **Logs & Alertas** | Tabla de todos los días/usuarios con IS, scores, pannalla, pasos, segmentos. Filtrable por nivel (Crítico/Alerta/Todos). 350+ registros con badges de nivel |
 | **Banco de Pruebas** | Simulador de pesos W₁/W₂ con sliders. Recalcula IS en tiempo real y muestra histograma dual (original vs simulado), delta IS, días críticos simulados |
 | **Exportar** | Descarga CSV y JSON de todos los datos procesados |
@@ -461,7 +461,7 @@ App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil
 | Componente | Descripción |
 |---|---|
 | **Cabecera** | Saludo personalizado (ej. "Hola, Álvaro" dependiente de la hora), fecha y mini-selector de usuario discretamente integrado. |
-| **Tooltips SVG Contextuales** | Al mantener el dedo (Hover interaccional) la gráfica dibuja una cruceta de tracking que expone un pequeño icono SVG indicando el estatus real evaluado cognitivamente en ese momento (🔵 Productivo, 🔴 Ocio, ⚪ Inactivo). |
+| **Tooltips SVG Contextuales** | Al mantener el dedo (Hover interaccional) la gráfica dibuja una cruceta de tracking que expone un pequeño icono SVG indicando el estatus real evaluado cognitivamente en ese momento ( Productivo,  Ocio,  Inactivo). |
 | **Gauge IS circular** | Anillo SVG animado y texturizado para alto contraste, con color dinámico por nivel. |
 | **Gráfico intradía** | Línea ininterrumpida fluida acoplada a una **Threshold Line Punteada ROJA** marcando mecánicamente el umbral del 70%. |
 | **Rest Points** | Se visualizan como **Áreas sombreadas en rojo translúcido**, cayendo desde debajo de la curva del Threshold en momentos concretos donde ocurre el *Peligro* para delimitar puramente las zonas "No Productivas" del gráfico. |
@@ -752,7 +752,7 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-> ⚠️ **Advertencia de Datos Crítica:** Recuerda siempre ejecutar `python extract_gem.py` en ambas plataformas después de cualquier cambio en el motor o en los datasets base, antes de desplegar. El motor se ejecuta pre-runtime, no durante. Si `gem_data.json` no se sube compilado, las webs fallarán sin mostrar métricas.
+>  **Advertencia de Datos Crítica:** Recuerda siempre ejecutar `python extract_gem.py` en ambas plataformas después de cualquier cambio en el motor o en los datasets base, antes de desplegar. El motor se ejecuta pre-runtime, no durante. Si `gem_data.json` no se sube compilado, las webs fallarán sin mostrar métricas.
 
 ---
 
