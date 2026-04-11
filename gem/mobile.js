@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   GEM Mobile — App Logic
+   Teyka Mobile — App Logic
    Trade Republic chart + Swipe + iOS Notifications
    ═══════════════════════════════════════════════════════════════ */
 

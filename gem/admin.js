@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   GEM Admin — Research Panel Logic
+   Teyka Admin — Research Panel Logic
    Uses globem_users from gem_data.json (daily IS aggregates)
    ═══════════════════════════════════════════════════════════════ */
 
