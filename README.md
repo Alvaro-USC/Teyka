@@ -6,6 +6,22 @@ Proyecto Teyka es una solución tecnológica diseñada para combatir la pérdida
 
 ---
 
+## Cómo ejecutar el proyecto
+
+```bash
+cd gem
+python -m http.server 8096
+# Abrir en el navegador el dashboard de desarrolladores: http://localhost:8096/admin.html
+```
+[http://localhost:8096/admin.html](http://localhost:8096/admin.html)
+```bash
+cd "gem - phone"
+python -m http.server 8097
+# Abrir en el navegador la app móvil: http://localhost:8097/mobile.html 
+```
+[http://localhost:8096/admin.html](http://localhost:8097/mobile.html)
+---
+
 ## Arquitectura del Producto
 
 El proyecto se divide en tres productos integrados en este repositorio:
