@@ -55,21 +55,21 @@ function initNav() {
 
 // ─── Helpers ────────────────────────────────────────────────
 function isBadge(val) {
-    if (val >= 75) return `<span class="is-badge is-critical">${val.toFixed(1)}%</span>`;
+    if (val >= 70) return `<span class="is-badge is-critical">${val.toFixed(1)}%</span>`;
     if (val >= 50) return `<span class="is-badge is-alert">${val.toFixed(1)}%</span>`;
     if (val >= 25) return `<span class="is-badge is-attention">${val.toFixed(1)}%</span>`;
     return `<span class="is-badge is-optimal">${val.toFixed(1)}%</span>`;
 }
 
 function levelBadge(val) {
-    if (val >= 75) return '<span class="level-badge is-critical">CRITICO</span>';
+    if (val >= 70) return '<span class="level-badge is-critical">CRITICO</span>';
     if (val >= 50) return '<span class="level-badge is-alert">ALERTA</span>';
     if (val >= 25) return '<span class="level-badge is-attention">ATENCION</span>';
     return '<span class="level-badge is-optimal">OPTIMO</span>';
 }
 
 function isColor(val) {
-    if (val >= 75) return '#E53935';
+    if (val >= 70) return '#E53935';
     if (val >= 50) return '#EF5350';
     if (val >= 25) return '#EAB308';
     return '#22C55E';
@@ -91,7 +91,7 @@ function renderOverview() {
     const days = allDays();
     const totalDays = days.length;
     const avgIS = days.reduce((s, d) => s + d.IS, 0) / totalDays;
-    const criticalDays = days.filter(d => d.IS >= 75).length;
+    const criticalDays = days.filter(d => d.IS >= 70).length;
     const avgScreen = days.reduce((s, d) => s + (d.screen_min_allday || 0), 0) / totalDays;
     const avgSteps = days.reduce((s, d) => s + (d.steps_allday || 0), 0) / totalDays;
 
@@ -112,7 +112,7 @@ function renderOverview() {
     const binLabels = bins.map((_, i) => `${i * 5}-${i * 5 + 5}`);
     const binColors = bins.map((_, i) => {
         const mid = i * 5 + 2.5;
-        if (mid >= 75) return '#E53935';
+        if (mid >= 70) return '#E53935';
         if (mid >= 50) return '#EF5350';
         if (mid >= 25) return '#EAB308';
         return '#22C55E';
@@ -287,7 +287,7 @@ function renderUsers() {
 
     tbody.innerHTML = '';
     sorted.forEach(u => {
-        const critical = u.daily.filter(d => d.IS >= 75).length;
+        const critical = u.daily.filter(d => d.IS >= 70).length;
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td style="font-weight:600;color:var(--text)">${u.pid}</td>
@@ -315,7 +315,7 @@ function showUserDetail(user) {
 
     // KPIs
     const kpis = document.getElementById('detail-kpis');
-    const critical = user.daily.filter(d => d.IS >= 75).length;
+    const critical = user.daily.filter(d => d.IS >= 70).length;
     const entSegments = user.daily.reduce((s, d) =>
         s + (d.session_class ? Object.values(d.session_class).filter(v => v === 'entertainment').length : 0), 0);
     
@@ -519,7 +519,7 @@ function renderLogs() {
     const filter = document.getElementById('log-filter').value;
     const days = allDays();
     let filtered = days;
-    if (filter === 'critical') filtered = days.filter(d => d.IS >= 75);
+    if (filter === 'critical') filtered = days.filter(d => d.IS >= 70);
     else if (filter === 'alert') filtered = days.filter(d => d.IS >= 50);
 
     filtered.sort((a, b) => b.IS - a.IS);

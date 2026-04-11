@@ -2,7 +2,7 @@
    Proyecto GEM — app.js
    IS Engine: IS = 0.60 × StressScore + 0.40 × BehaviorScore
    Session classification: Productive (green) vs Entertainment (red)
-   Alert system: Trigger when IS > 75%
+   Alert system: Trigger when IS > 70% and user is in Entertainment state
    ═══════════════════════════════════════════════════════════════ */
 
 // ─── Chart defaults ─────────────────────────────────────────────
@@ -167,7 +167,7 @@ function updateDay(dayIdx) {
     const alert = document.getElementById('is-alert');
     const SUGGESTIONS = ['💧 Bebe agua y estira', '🚶 Pasea 15 min', '🎸 Toca la guitarra', '📖 Lee un capítulo',
         '🧘 Medita 5 min', '🎨 Dibuja algo', '🏃 Sal a correr', '☕ Prepárate un té'];
-    if (is >= 75) {
+    if (is >= 70 && entCount > 0) {
         alert.classList.remove('hidden');
         document.getElementById('is-alert-action').textContent = SUGGESTIONS[dayIdx % SUGGESTIONS.length];
     } else {
@@ -431,14 +431,14 @@ function initNudge() {
     });
 
     document.getElementById('wn-accept').addEventListener('click', () => feedback.classList.remove('hidden'));
-    document.getElementById('wn-later').addEventListener('click', () => { notif.classList.add('hidden'); idle.classList.remove('hidden'); nudgeState = 'idle'; btn.textContent = 'Simular Alerta IS > 75%'; });
+    document.getElementById('wn-later').addEventListener('click', () => { notif.classList.add('hidden'); idle.classList.remove('hidden'); nudgeState = 'idle'; btn.textContent = 'Simular Alerta IS > 70% (Ocio)'; });
     document.getElementById('fb-y').addEventListener('click', showOK);
     document.getElementById('fb-n').addEventListener('click', showOK);
 
     function showOK() {
         notif.classList.add('hidden'); ok.classList.remove('hidden');
         nudgeState = 'ok';
-        setTimeout(() => { ok.classList.add('hidden'); idle.classList.remove('hidden'); nudgeState = 'idle'; btn.textContent = 'Simular Alerta IS > 75%'; }, 3000);
+        setTimeout(() => { ok.classList.add('hidden'); idle.classList.remove('hidden'); nudgeState = 'idle'; btn.textContent = 'Simular Alerta IS > 70% (Ocio)'; }, 3000);
     }
 }
 

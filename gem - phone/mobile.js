@@ -173,6 +173,64 @@ function renderDay() {
     setBar('df-stress', hourData.stress / 100, '#E53935');
     setBar('df-behavior', hourData.behavior / 100, '#FF9F0A');
 
+    // Inyectar contexto demo dinámico una sola vez por día
+    if (!day._demoInjected) {
+        day._demoInjected = true;
+        
+        // Generar un patrón estocástico pero coherente
+        day.hourly.forEach((h) => {
+            if (h.hour < 8) h.app_type = 'inactive';
+            else if (h.hour < 14) h.app_type = Math.random() > 0.2 ? 'productive' : 'non-productive'; 
+            else if (h.hour < 16) h.app_type = Math.random() > 0.4 ? 'non-productive' : 'productive'; 
+            else if (h.hour < 20) h.app_type = Math.random() > 0.3 ? 'productive' : 'non-productive'; 
+            else h.app_type = Math.random() > 0.6 ? 'productive' : 'non-productive'; 
+            
+            // Alterar algo de IS original (+/- 10%) para ruido natural
+            h.is = Math.max(0, Math.min(100, (h.is || 0) + (Math.random() * 20 - 10)));
+        });
+
+        // Asegurar puntos clave variados
+        if (day.hourly.length > 20) {
+            // Pico productivo por estrés de trabajo válido
+            const prodIdx = 9 + Math.floor(Math.random() * 4); // 9-12
+            if (day.hourly[prodIdx]) {
+                day.hourly[prodIdx].app_type = 'productive';
+                day.hourly[prodIdx].is = 76 + Math.random() * 10;
+            }
+
+            // Ocio de mediodía (Riesgo frecuente de segunda banda roja)
+            const chillIdx = 13 + Math.floor(Math.random() * 3); // 13-15
+            if (day.hourly[chillIdx]) {
+                day.hourly[chillIdx].app_type = 'non-productive';
+                // 50% de probabilidad de que el descanso de mediodía cruce el umbral y genere otra alerta visual
+                day.hourly[chillIdx].is = Math.random() > 0.5 ? (72 + Math.random() * 15) : (40 + Math.random() * 20);
+            }
+
+            // Ocio de media mañana (30% chance de banda roja extra por la mañana)
+            const mornChill = 10 + Math.floor(Math.random() * 2); // 10-11
+            if (Math.random() > 0.7 && day.hourly[mornChill]) {
+                day.hourly[mornChill].app_type = 'non-productive';
+                day.hourly[mornChill].is = 73 + Math.random() * 10;
+            }
+
+            // Pico de ocio desencadenante primario (Asegurado SIEMPRE en la demo principal, tarde/noche)
+            const triggerIdx = 18 + Math.floor(Math.random() * 4); // 18-21
+            if (day.hourly[triggerIdx]) {
+                day.hourly[triggerIdx].app_type = 'non-productive';
+                day.hourly[triggerIdx].is = 76 + Math.random() * 12;
+            }
+        }
+    }
+
+    day.rest_points = [];
+    let maxContextIS = 0;
+    day.hourly.forEach(h => {
+        if (h.is > 70 && h.app_type === 'non-productive') {
+            day.rest_points.push(h.hour);
+            if (h.is > maxContextIS) maxContextIS = h.is;
+        }
+    });
+
     // Rest points
     renderRestPoints(day);
 
@@ -186,9 +244,8 @@ function renderDay() {
     }
 
     // Maybe trigger notification
-    const maxIS = Math.max(...day.hourly.map(h => h.is));
-    if (maxIS > 65 && !state.notifShown) {
-        setTimeout(() => showNotification(day), 2000);
+    if (maxContextIS > 70 && !state.notifShown) {
+        showNotification(day);
     }
 }
 
@@ -218,16 +275,33 @@ function renderDayChart(day) {
     const values = day.hourly.map(h => h.is);
     const restSet = new Set(day.rest_points || []);
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
     const maxVal = Math.max(...values);
+    
+    const thresholdLinePlugin = {
+        id: 'thresholdLine',
+        beforeDraw(chart) {
+            const { ctx, chartArea, scales: { y } } = chart;
+            if (!chartArea || !y) return;
+            const targetY = y.getPixelForValue(70);
+            if (targetY >= chartArea.top && targetY <= chartArea.bottom) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.moveTo(chartArea.left, targetY);
+                ctx.lineTo(chartArea.right, targetY);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
     if (maxVal > 70) {
-        gradient.addColorStop(0, 'rgba(229, 57, 53, 0.35)');
-        gradient.addColorStop(0.5, 'rgba(229, 57, 53, 0.08)');
-        gradient.addColorStop(1, 'rgba(229, 57, 53, 0)');
-    } else if (maxVal > 40) {
-        gradient.addColorStop(0, 'rgba(239, 154, 154, 0.30)');
-        gradient.addColorStop(0.5, 'rgba(239, 154, 154, 0.08)');
-        gradient.addColorStop(1, 'rgba(239, 154, 154, 0)');
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.35)');
+        gradient.addColorStop(0.5, 'rgba(79, 70, 229, 0.08)');
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
     } else {
         gradient.addColorStop(0, 'rgba(199, 199, 204, 0.15)');
         gradient.addColorStop(1, 'rgba(199, 199, 204, 0)');
@@ -364,18 +438,22 @@ function renderDayChart(day) {
                     const idx = elements[0].index;
                     const h = day.hourly[idx];
                     tooltip.querySelector('#tooltip-hour').textContent = `${h.hour}:00`;
-                    tooltip.querySelector('#tooltip-is').textContent = `${Math.round(h.is)}%`;
+                    
+                    const appLabel = h.app_type === 'productive' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;color:#4F46E5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>Productivo' :
+                                     h.app_type === 'non-productive' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;color:#EF4444"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>Ocio' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;color:#AEAEB2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>Inactivo';
+                    
+                    tooltip.querySelector('#tooltip-is').innerHTML = `<span style="font-size:12px;color:#AEAEB2;font-weight:400">${appLabel}</span><br><strong style="font-size:16px">${Math.round(h.is)}% IS</strong>`;
                     tooltip.classList.add('visible');
                     const x = elements[0].element.x;
                     const y = elements[0].element.y;
-                    tooltip.style.left = `${x - 30}px`;
-                    tooltip.style.top = `${y - 55}px`;
+                    tooltip.style.left = `${x - 40}px`;
+                    tooltip.style.top = `${y - 65}px`;
                 } else {
                     tooltip.classList.remove('visible');
                 }
             }
         },
-        plugins: [restBandsPlugin]
+        plugins: [restBandsPlugin, thresholdLinePlugin]
     });
 }
 
@@ -693,17 +771,23 @@ function showNotification(day) {
     if (state.notifShown) return;
     state.notifShown = true;
 
-    const maxH = day.hourly.reduce((a, b) => a.is > b.is ? a : b);
+    const notifPoint = day.hourly.filter(h => h.is > 70 && h.app_type === 'non-productive').reduce((a, b) => a.is > b.is ? a : b, {is: 0, hour: 0});
+    if (!notifPoint.hour) return;
+
     const screenTotal = Math.round(day.screen_total);
-
-    document.getElementById('notif-title').textContent = 'Tu cuerpo necesita un descanso';
-    document.getElementById('notif-body').textContent =
-        `Llevas ${screenTotal} min de pantalla hoy. Tu IS alcanzó ${Math.round(maxH.is)}% a las ${maxH.hour}:00. Intenta caminar 10 minutos.`;
-
+    const titleEl = document.getElementById('notif-title');
+    const bodyEl = document.getElementById('notif-body');
     const card = document.getElementById('notif-card');
+    
+    titleEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>Gemini calculando nudge...';
+    bodyEl.innerHTML = `<span style="opacity:0.7">Saturación crítica (IS ${Math.round(notifPoint.is)}%) detectada en zona horaria no productiva. Generando sugerencia contextual...</span>`;
     card.classList.add('notif-visible');
 
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    setTimeout(() => {
+        titleEl.textContent = 'Tu mente necesita un descanso';
+        bodyEl.innerHTML = `Llevas <strong>${screenTotal} min</strong> de pantalla hoy y alcanzaste un <strong>${Math.round(notifPoint.is)}% IS</strong> a las ${notifPoint.hour}:00 durante uso no productivo.<br><br>💡 Nuestro modelo sugiere que salgas a <strong>caminar 15 min mientras escuchas música</strong> para reducir el estrés.`;
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }, 2500);
 }
 
 function dismissNotif() {

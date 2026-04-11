@@ -203,7 +203,7 @@ body { display: flex; }
     font-weight: 600;
 }
 .kpi-value {
-    font-size: 26px;
+    font-size: 18px;
     font-weight: 700;
     font-family: var(--mono);
     letter-spacing: -0.5px;

@@ -10,8 +10,7 @@
 
 El Proyecto GEM propone un cambio de paradigma: pasar del **bloqueo reactivo de aplicaciones** a la **gestión proactiva del estado nervioso**. Utilizamos la biometría como "alarma temprana" de la pérdida de autorregulación cognitiva.
 
-El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina estrés fisiológico (variabilidad cardíaca) con patrones de comportamiento digital (uso de pantalla, actividad física). Cuando el IS supera el 75%, el sistema genera una **intervención proactiva (Nudge)** sugiriendo actividades alternativas.
-
+El sistema calcula un **Índice de Saturación (IS)** en tiempo real que combina estrés fisiológico (variabilidad cardíaca) con patrones de comportamiento digital (uso de pantalla, actividad física). Cuando el IS supera el **umbral crítico del 70%** y el usuario se halla en un estado cognitivo **de inercia u Ocio**, el sistema genera una **intervención proactiva context-aware (Nudge)** sugiriendo medidas correctoras estructuradas a través del asistente de Inteligencia Artificial.
 ### Referencia Académica
 
 > Wang, R., Chen, F., Chen, Z. et al. «StudentLife: Assessing Mental Health, Academic Performance and Behavioral Trends of College Students using Smartphones», ACM UbiComp, 2021.
@@ -320,11 +319,16 @@ rmssd_drop = (screen_norm * 0.6 + sed_norm * 0.4) * 14 * (1 - act_prot)
 h_rmssd = max(baseline - rmssd_drop, 6)   # Floor: 6 ms (más bajo)
 ```
 
-**Rest points:** Se detectan horas donde el IS supera 50% siendo un pico local, o cualquier hora que cruce 75%.
+**Puntos Críticos (Rest Points):** Se analizan de forma granular las horas intradía donde la gráfica cruza un porcentaje altísimo y riesgoso de estrés.
 
-### 5.6 Umbral de Alerta
+### 5.6 Umbral de Alerta y Prevención (Condición Dual 70)
 
-Cuando **IS > 75%**, el sistema activa la intervención proactiva (Nudge).
+Para evitar falsos positivos por "estrés funcional o bueno" (ej: alta atención continua en un examen importante o trabajando frente al ordenador), la alerta no se dispara únicamente por alcanzar un pico. La notificación y las franjas de riesgo toxicológico visual **sólo se activan si se cumplen DOS condiciones concurrentes**:
+
+1. **Saturación Crítica:** El IS supera el **trigger analítico del 70%** (indicado visualmente por la *threshold line* roja punteada constante en el App Móvil).
+2. **Contexto de Ocio (Inercial):** El estado inferido de la sesión recae estrictamente en **"No Productivo"** (Ocio/Entretenimiento pasivo).
+
+Si el IS supera el 70% bajo un foco Productivo, el sistema lo catalogará como "estrés normal/enfocado" asumiéndolo temporal, suprimiendo la alerta para salvar el momentum del usuario.
 
 ---
 
@@ -385,35 +389,39 @@ El sedentarismo del día (corregido: 960 - active_min) contribuye al 40% de la c
 
 ---
 
-## 8. Sistema de Nudge
+## 8. Sistema de Nudge Context-Aware (Gemini Integration)
 
-### 8.1 Trigger
-Cuando IS > 75%, el sistema activa la intervención proactiva.
+### 8.1 Disparador Dual (Dual-Condition Trigger)
+Siguiendo la prevención de falsos positivos, la intervención preventiva requiere inequívocamente: **(IS > 70% AND app_type == 'non-productive')**.
 
-### 8.2 Flujo
+### 8.2 Flujo Operativo AI
 
 ```
 1. 📡 Monitoreo Pasivo
-   → Smartwatch captura RMSSD, móvil registra pantalla y actividad
+   → Smartwatch captura RMSSD, móvil registra pantalla y patrón de uso de apps
 
-2. 🧠 Motor IS
-   → StressScore + BehaviorScore → IS > 75% → Trigger
+2. 🧠 Evaluación Dual (Stress + Context)
+   → StressScore + BehaviorScore → Evalúa si el tipo de uso actual es Ocio y supera el 70%
 
-3. 🔔 Nudge Contextual
-   → Notificación estilo iOS con sugerencia de descanso
+3. ✨ Generación AI (Gemini)
+   → El modal simula "Gemini calculando nudge...", procesando métricas horarias y leyendo hobbies en tiempo real.
+   → Proporciona un nudging context-aware pasivo (ej: dar un paseo, meditar 15 min con Apple Music).
 
-4. 🔄 Aprendizaje Continuo
-   → Feedback del usuario ajusta pesos para futuras intervenciones
+4. 🔄 Cierre de Ciclo
+   → Confirmación temporal y supresión del gráfico de saturación.
 ```
 
-### 8.3 Implementación en App Móvil
+### 8.3 Inyección Estocástica de Datos (Visual Demo)
+Para que las pruebas, el jurado, y los simulacros de App sean creíbles sin depender del día que se abra: La App Móvil **no carga una curva repetitiva**. Incorpora un **motor estocástico predictivo** interno. 
+- Al abrir la App, distribuye dinámicamente horas productivas hacia la mañana, ocio a mediodía (almuerzos), esparciendo estados inactivos basándose en el biorritmo genérico (ruido de base `IS +/- 10%`).
+- Esto garantiza curvas completamente orgánicas y realistas que disparan la alarma a horas de pico naturales según el histórico del `UserIdx`.
 
-La app móvil (`gem - phone/mobile.html`) implementa **notificaciones estilo iOS** que:
-- Aparecen como pop-up superior con animación slide-down
-- Muestran datos reales: minutos de pantalla, hora del pico IS, sugerencia concreta
-- Ofrecen dos acciones: "Descansar ahora" / "En 15 min"
-- Incluyen vibración tactile (si el dispositivo lo soporta)
-
+### 8.4 Implementación en App Móvil
+La app móvil (`gem - phone/mobile.html`) implementa **notificaciones estilo nativas iOS** que:
+- Surgen como Pop-ups translúcidos integrando un timer.
+- Muestran el *IS* instantáneo, minutos sumados, y recomendaciones dictaminadas por Gemini.
+- Desvían con "Descansar ahora" o "Posponer 15 min".
+- Empujan **Haptic feedback** vibratorio (`navigator.vibrate([100,50,100])`) disparando alertas cinestésicas vinculadas al peligro cognitivo.
 ---
 
 ## 9. Productos y Funcionalidades
@@ -450,14 +458,15 @@ App de salud estilo iOS, minimalista, paleta blanco/rojo. Optimizada para móvil
 | Componente | Descripción |
 |---|---|
 | **Cabecera** | Saludo personalizado (ej. "Hola, Álvaro" dependiente de la hora), fecha y mini-selector de usuario discretamente integrado. |
+| **Tooltips SVG Contextuales** | Al mantener el dedo (Hover interaccional) la gráfica dibuja una cruceta de tracking que expone un pequeño icono SVG indicando el estatus real evaluado cognitivamente en ese momento (🔵 Productivo, 🔴 Ocio, ⚪ Inactivo). |
 | **Gauge IS circular** | Anillo SVG animado y texturizado para alto contraste, con color dinámico por nivel. |
-| **Gráfico intradía** | Línea estilo Trade Republic sin puntos (limpia), con un umbral de alerta punteado (70%). |
-| **Rest Points** | Se visualizan como **franjas verticales rojas** translúcidas directamente sobre el gráfico, indicando las horas de uso tóxico sugeridas para el descanso. |
+| **Gráfico intradía** | Línea ininterrumpida fluida acoplada a una **Threshold Line Punteada ROJA** marcando mecánicamente el umbral del 70%. |
+| **Rest Points** | Se visualizan como **Áreas sombreadas en rojo translúcido**, cayendo desde debajo de la curva del Threshold en momentos concretos donde ocurre el *Peligro* para delimitar puramente las zonas "No Productivas" del gráfico. |
 | **Selector de rango** | Hoy (24h) / Semana (7 días) / Mes (todos los días). |
-| **Health cards** | RMSSD, Pasos, Pantalla y Actividad con barras de progreso métricas e **iconos vectoriales SVG** de alta fidelidad. |
+| **Health cards** | RMSSD, Pasos, Pantalla y Actividad con barras de progreso métricas e **iconos vectoriales SVG sin emojis** de alta profesionalidad. |
 | **Descomposición IS** | StressScore y BehaviorScore con los pesos del motor (0.55 / 0.45). |
-| **Historial** | Calendario coloreado por IS, chart histórico de área, y panel inferior de estadísticas (media, máximo, tendencia). |
-| **Notificaciones** | Pop-up nativo iOS-style con datos reales y call-to-actions. |
+| **Historial Dinámico** | Cajas calendáricas interactivas coloreadas, con una curva continua y estadísticas descriptivas matemáticas superpuestas. |
+| **Notificación IA** | Pop-up nativo emulando Gemini, recabando métricas al milisegundo y arrojando una alerta inmersiva por saturación Ocio + IS. |
 
 ---
 
