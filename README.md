@@ -1,4 +1,4 @@
-# Proyecto Teyka: Gestión del Estado Nervioso
+# Proyecto Teyka: Medimos tus constantes, te enseñamos cuándo parar
 
 > "De la biometría pasiva a la intervención proactiva."
 
