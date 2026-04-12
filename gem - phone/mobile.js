@@ -932,10 +932,7 @@ function initOnboarding() {
         return;
     }
 
-    // Auto-advance from welcome after 8s
-    setTimeout(() => {
-        if (obStep === 0) advanceOnboarding();
-    }, 8000);
+
 
     // Next button
     document.getElementById('ob-next-btn').addEventListener('click', advanceOnboarding);
