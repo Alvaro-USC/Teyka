@@ -69,4 +69,4 @@ El sistema pondera estas divergencias respecto al marco base (baseline) individu
 
 ---
 
-> Proyecto Teyka - Impacthon USC 2026
+> Proyecto Teyka - Proyecto ganador del Impacthon USC 2026 🏅
