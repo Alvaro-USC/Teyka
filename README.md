@@ -1,5 +1,7 @@
 # Proyecto Teyka: Medimos tus constantes, te enseñamos cuándo parar
 
+> Proyecto Teyka - Proyecto ganador del Impacthon USC 2026 🏅
+
 > "De la biometría pasiva a la intervención proactiva."
 
 Proyecto Teyka es una solución tecnológica diseñada para combatir la pérdida de autorregulación cognitiva mediante el análisis de datos biométricos en tiempo real. A diferencia del bloqueo reactivo tradicional, Teyka actúa como un monitor continuo que detecta la saturación del sistema nervioso autónomo para sugerir desvíos psicológicos de bajo coste basados en IA.
@@ -69,4 +71,4 @@ El sistema pondera estas divergencias respecto al marco base (baseline) individu
 
 ---
 
-> Proyecto Teyka - Proyecto ganador del Impacthon USC 2026 🏅
+
