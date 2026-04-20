@@ -48,6 +48,9 @@ const SVG = {
 
 // ─── Init ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+    // Esto borra los datos al abrir la app
+    localStorage.removeItem('gem_onboarded');
+    localStorage.removeItem('gem_hobbies');
     updateClock();
     setInterval(updateClock, 30000);
 
